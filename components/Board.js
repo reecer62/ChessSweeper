@@ -7,6 +7,7 @@ export default class Board {
 	constructor({ selector, size }) {
 		this.size = size;
 		this.squares = {};
+		this.squareElements = new Map();
 		this.element = document.querySelector(selector);
 		this.element.classList.add("Board");
 		this.chess = new Chess();
@@ -16,9 +17,11 @@ export default class Board {
 		this.dragging = false;
 		this.lastMousePos = [];
 		this.draggedPiece;
+		this.prevSquare;
 		this.element.onmousedown = (event) => {
 			event.preventDefault();
 			this.dragging = true;
+			this.prevSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => Array.prototype.slice.call(e.classList).includes("Square")));
 			this.lastMousePos = [event.clientX, event.clientY];
 			this.draggedPiece = event.target;
 			this.draggedPiece.style.position = "absolute";
@@ -28,9 +31,13 @@ export default class Board {
 			event.preventDefault();
 			this.dragging = false;
 			this.lastMousePos = [];
-			// this.draggedPiece.style.position = null;
+			this.prevSquare.removePiece(this.draggedPiece);
+			const newSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => Array.prototype.slice.call(e.classList).includes("Square")));
+			newSquare.addPiece(this.draggedPiece);
+			this.draggedPiece.style.position = null;
 			this.draggedPiece.style.zIndex = 0;
 			this.draggedPiece = null;
+			this.prevSquare = null;
 		};
 		this.element.onmousemove = (event) => {
 			if (this.dragging) {
@@ -55,6 +62,7 @@ export default class Board {
 			const bg = rank % 2 === fileNum % 2 ? "white" : "gray"
 			const square = new Square({ rank, file, bg });
 			this.element.appendChild(square.element);
+			this.squareElements.set(square.element, square);
 			this.squares[`${file}${rank}`] = square;
 		}
 
@@ -64,7 +72,7 @@ export default class Board {
 			rank.forEach((square, fi) => {
 				if (!(square === null)) {
 					const piece = new Piece({ type: `${square.color}${square.type}`, size: `${squareSize}px` });
-					this.squares[`${files[fi]}${ri + 1}`].placePiece(piece);
+					this.squares[`${files[fi]}${ri + 1}`].addPiece(piece.element);
 				}
 			});
 		});
