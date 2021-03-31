@@ -6,4 +6,13 @@ export default class Square {
 		this.element.classList.add("Square");
 		this.element.style.background = bg;
 	}
+
+	placePiece(piece) {
+		this.piece = piece;
+		this.element.appendChild(piece.element);
+	}
+
+	get size() {
+		return this.element.clientHeight;
+	}
 }
