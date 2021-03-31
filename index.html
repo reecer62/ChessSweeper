@@ -7,17 +7,14 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>ChessSweeper</title>
 
-	<link rel="stylesheet" type="text/css" media="screen" href="dependencies/chessboardjs/css/chessboard-1.0.0.min.css">
-	<link rel="stylesheet" type="text/css" media="screen" href="styles/main.css">
+	<script src="dependencies/chess.min.js"></script>
 
-	<script src="dependencies/jquery/jquery-3.4.1.min.js"></script>
-	<script src="dependencies/chess.js/chess.js"></script>
-	<script src="dependencies/chessboardjs/js/chessboard-1.0.0.min.js"></script>
-</head>
+	<link rel="stylesheet" href="normalize.min.css">
+	<link rel="stylesheet" href="main.css">
 
 <body>
-	<div id="myBoard" style="width: 400px"></div>
-	<script src="scripts/main.js"></script>
+	<div id="board"></div>
+	<script type="module" src="main.js"></script>
 </body>
 
 </html>

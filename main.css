@@ -1,0 +1,22 @@
+body {
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.Board {
+	border: 10px solid black;
+	display: grid;
+	grid-template-columns: repeat(8, 1fr);
+	grid-template-rows: repeat(8, 1fr);
+}
+
+.Square:nth-child() {
+	background: black;
+}
+
+.Square:nth-child(2n) {
+	background: white;
+}
