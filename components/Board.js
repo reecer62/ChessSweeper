@@ -1,5 +1,5 @@
 import Piece from "./Piece.js";
-import Square from "./Square.js"
+import Square from "./Square.js";
 
 const files = ["a", "b", "c", "d", "e", "f", "g", "h"]
 
@@ -19,13 +19,15 @@ export default class Board {
 		this.draggedPiece;
 		this.prevSquare;
 		this.element.onmousedown = (event) => {
-			event.preventDefault();
-			this.dragging = true;
-			this.prevSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => Array.prototype.slice.call(e.classList).includes("Square")));
-			this.lastMousePos = [event.clientX, event.clientY];
-			this.draggedPiece = event.target;
-			this.draggedPiece.style.position = "absolute";
-			this.draggedPiece.style.zIndex = 1;
+			if (Array.prototype.slice.call(event.target.classList).includes("Piece")) {
+				event.preventDefault();
+				this.dragging = true;
+				this.prevSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => Array.prototype.slice.call(e.classList).includes("Square")));
+				this.lastMousePos = [event.clientX, event.clientY];
+				this.draggedPiece = event.target;
+				this.draggedPiece.style.position = "absolute";
+				this.draggedPiece.style.zIndex = 1;
+			}
 		}
 		this.element.onmouseup = (event) => {
 			event.preventDefault();

@@ -12,6 +12,10 @@ export default class Square {
 		if (this.piece === null) {
 			this.piece = piece;
 			this.element.appendChild(piece);
+		} else {
+			this.element.removeChild(this.piece);
+			this.piece = piece;
+			this.element.appendChild(piece);
 		}
 	}
 
