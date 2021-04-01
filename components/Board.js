@@ -9,8 +9,31 @@ export default class Board {
 		this.squares = {};
 		this.squareElements = new Map();
 		this.pieceElements = new Map();
-		this.element = document.querySelector(selector);
+
+		this.container = document.querySelector(selector);
+
+		let button = document.createElement("button");
+		button.textContent = "Flip Board";
+		this.container.appendChild(button);
+
+		this.element = document.createElement("div");
 		this.element.classList.add("Board");
+		this.container.appendChild(this.element);
+		this.flipped = false;
+		button.onclick = () => {
+			console.log(this)
+			if (this.flipped) {
+				this.element.style.direction = "ltr";
+			} else {
+				this.element.style.direction = "rtl";
+			}
+			this.flipped = !this.flipped;
+
+			for (var i = 1; i < this.element.childNodes.length; i++) {
+				this.element.insertBefore(this.element.childNodes[i], this.element.firstChild);
+			}
+		};
+
 		this.game = new Chess();
 
 		this.init();
@@ -50,27 +73,27 @@ export default class Board {
 				if (move !== null) {
 					this.prevSquare.removePiece(this.draggedPiece);
 					newSquare.addPiece(this.draggedPiece);
+
+					let moveColor = "White";
+					if (this.game.turn() === "b") {
+						moveColor = "Black";
+					}
+					if (this.game.in_checkmate()) {
+						this.status = `Game over, ${moveColor} is in checkmate.`
+					} else if (this.game.in_draw()) {
+						this.status = "Game over, drawn position.";
+					} else {
+						this.status = `${moveColor} to move.`;
+						if (this.game.in_check()) {
+							this.status += ` ${moveColor} is in check.`;
+						}
+					}
+					console.log(this.status)
 				}
 				this.draggedPiece.style.position = null;
 				this.draggedPiece.style.zIndex = 0;
 				this.draggedPiece = null;
 				this.prevSquare = null;
-
-				let moveColor = "White";
-				if (this.game.turn() === "b") {
-					moveColor = "Black";
-				}
-				if (this.game.in_checkmate()) {
-					this.status = `Game over, ${moveColor} is in checkmate.`
-				} else if (this.game.in_draw()) {
-					this.status = "Game over, drawn position.";
-				} else {
-					this.status = `${moveColor} to move.`;
-					if (this.game.in_check()) {
-						this.status += ` ${moveColor} is in check.`;
-					}
-				}
-				console.log(this.status)
 
 				return false;
 			}
