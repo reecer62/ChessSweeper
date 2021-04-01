@@ -10,11 +10,116 @@ body {
 	align-items: center;
 }
 
+#boardContainer .b1 {
+	grid-area: b1;
+}
+
+#boardContainer .b2 {
+	grid-area: b2;
+}
+
+#boardContainer .b3 {
+	grid-area: b3;
+}
+
+#boardContainer .b4 {
+	grid-area: b4;
+}
+
+#boardContainer .b5 {
+	grid-area: b5;
+}
+
+#boardContainer .b6 {
+	grid-area: b6;
+}
+
+#boardContainer .b7 {
+	grid-area: b7;
+}
+
+#boardContainer .b8 {
+	grid-area: b8;
+}
+
+#boardContainer .ba {
+	grid-area: ba;
+}
+
+#boardContainer .bb {
+	grid-area: bb;
+}
+
+#boardContainer .bc {
+	grid-area: bc;
+}
+
+#boardContainer .bd {
+	grid-area: bd;
+}
+
+#boardContainer .be {
+	grid-area: be;
+}
+
+#boardContainer .bf {
+	grid-area: bf;
+}
+
+#boardContainer .bg {
+	grid-area: bg;
+}
+
+#boardContainer .bh {
+	grid-area: bh;
+}
+
+#boardContainer [class^="b"] {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 5px;
+}
+
 .Board {
 	border: 10px solid black;
 	display: grid;
 	grid-template-columns: repeat(8,1fr);
 	grid-template-rows: repeat(8, 1fr);
+	grid-area: board;
+}
+
+#boardContainer {
+	display: grid;
+	grid-template-rows: 10px repeat(8, auto) 10px auto;
+	grid-template-columns: auto 10px repeat(8, auto) 10px;
+	grid-template-areas:
+	". board board board board board board board board board board"
+	"b8 board board board board board board board board board board"
+	"b7 board board board board board board board board board board"
+	"b6 board board board board board board board board board board"
+	"b5 board board board board board board board board board board"
+	"b4 board board board board board board board board board board"
+	"b3 board board board board board board board board board board"
+	"b2 board board board board board board board board board board"
+	"b1 board board board board board board board board board board"
+	". board board board board board board board board board board"
+	". . ba bb bc bd be bf bg bh .";
+}
+
+#boardContainer.flipped {
+	grid-template-areas:
+	". board board board board board board board board board board"
+	"b1 board board board board board board board board board board"
+	"b2 board board board board board board board board board board"
+	"b3 board board board board board board board board board board"
+	"b4 board board board board board board board board board board"
+	"b5 board board board board board board board board board board"
+	"b6 board board board board board board board board board board"
+	"b7 board board board board board board board board board board"
+	"b8 board board board board board board board board board board"
+	". board board board board board board board board board board"
+	". . ba bb bc bd be bf bg bh .";
 }
 
 .Square:nth-child() {
