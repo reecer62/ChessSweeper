@@ -1,15 +1,15 @@
 import Piece from "./Piece.js";
 import Square from "./Square.js";
 
-const files = ["a", "b", "c", "d", "e", "f", "g", "h"]
+const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 export default class Board {
 	constructor({ selector, size, network }) {
 		this.size = size;
 		this.network = network;
-		this.squares = {};
-		this.squareElements = new Map();
-		this.pieceElements = new Map();
+		this.squares = {}; //board positions to class objects
+		this.squareElements = new Map(); //dom objects to class objects
+		this.pieceElements = new Map(); //dom objects to class objects
 
 		this.element = document.querySelector(selector);
 		this.element.classList.add("Board");
@@ -89,7 +89,7 @@ export default class Board {
 		this.element.onmousemove = (event) => {
 			if (this.dragging) {
 				event.preventDefault();
-				let prevMousePos = [this.lastMousePos[0] - event.clientX, this.lastMousePos[1] - event.clientY];
+				const prevMousePos = [this.lastMousePos[0] - event.clientX, this.lastMousePos[1] - event.clientY];
 				this.lastMousePos = [event.clientX, event.clientY];
 
 				this.draggedPiece.style.top = `${this.draggedPiece.offsetTop - prevMousePos[1]}px`;
