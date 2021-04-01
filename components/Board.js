@@ -4,8 +4,9 @@ import Square from "./Square.js";
 const files = ["a", "b", "c", "d", "e", "f", "g", "h"]
 
 export default class Board {
-	constructor({ selector, size }) {
+	constructor({ selector, size, network }) {
 		this.size = size;
+		this.network = network;
 		this.squares = {};
 		this.squareElements = new Map();
 		this.pieceElements = new Map();
@@ -64,6 +65,12 @@ export default class Board {
 						this.status = `Game over, ${moveColor} is in checkmate.`
 					} else if (this.game.in_draw()) {
 						this.status = "Game over, drawn position.";
+					} else if (this.game.in_stalemate()) {
+						this.status = "Game over, stalemate position.";
+					} else if (this.game.in_threefold_repetition()) {
+						this.status = "Game over, threefold repetition rule.";
+					} else if (this.game.insufficient_material()) {
+						this.status = "Game over, insufficient material.";
 					} else {
 						this.status = `${moveColor} to move.`;
 						if (this.game.in_check()) {
