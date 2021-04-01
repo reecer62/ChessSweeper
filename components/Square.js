@@ -1,4 +1,6 @@
 export default class Square {
+	element;
+
 	constructor({ rank, file, bg }) {
 		this.rank = rank;
 		this.file = file;
@@ -24,7 +26,20 @@ export default class Square {
 		this.element.removeChild(piece);
 	}
 
+	fixSize() {
+		this.element.style.maxHeight = `${this.element.clientHeight}px`;
+		this.element.style.maxWidth = `${this.element.clientWidth}px`;
+	}
+
 	get size() {
 		return this.element.clientHeight;
+	}
+
+	get element() {
+		return this.element;
+	}
+
+	get position() {
+		return `${this.file}${this.rank}`;
 	}
 }

@@ -8,9 +8,10 @@ export default class Board {
 		this.size = size;
 		this.squares = {};
 		this.squareElements = new Map();
+		this.pieceElements = new Map();
 		this.element = document.querySelector(selector);
 		this.element.classList.add("Board");
-		this.chess = new Chess();
+		this.game = new Chess();
 
 		this.init();
 
@@ -18,8 +19,13 @@ export default class Board {
 		this.lastMousePos = [];
 		this.draggedPiece;
 		this.prevSquare;
+		this.status = "White to move.";
+		console.log(this.status)
 		this.element.onmousedown = (event) => {
-			if (Array.prototype.slice.call(event.target.classList).includes("Piece")) {
+			if (this.game.game_over()) {
+				return false;
+			}
+			if (Array.prototype.slice.call(event.target.classList).includes("Piece") && this.game.turn() === this.pieceElements.get(event.target).color) {
 				event.preventDefault();
 				this.dragging = true;
 				this.prevSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => Array.prototype.slice.call(e.classList).includes("Square")));
@@ -28,18 +34,46 @@ export default class Board {
 				this.draggedPiece.style.position = "absolute";
 				this.draggedPiece.style.zIndex = 1;
 			}
+			return false;
 		}
 		this.element.onmouseup = (event) => {
-			event.preventDefault();
-			this.dragging = false;
-			this.lastMousePos = [];
-			this.prevSquare.removePiece(this.draggedPiece);
-			const newSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => Array.prototype.slice.call(e.classList).includes("Square")));
-			newSquare.addPiece(this.draggedPiece);
-			this.draggedPiece.style.position = null;
-			this.draggedPiece.style.zIndex = 0;
-			this.draggedPiece = null;
-			this.prevSquare = null;
+			if (this.dragging) {
+				event.preventDefault();
+				this.dragging = false;
+				this.lastMousePos = [];
+				const newSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => Array.prototype.slice.call(e.classList).includes("Square")));
+				const move = this.game.move({
+					from: this.prevSquare.position,
+					to: newSquare.position,
+					promotion: "q"
+				});
+				if (move !== null) {
+					this.prevSquare.removePiece(this.draggedPiece);
+					newSquare.addPiece(this.draggedPiece);
+				}
+				this.draggedPiece.style.position = null;
+				this.draggedPiece.style.zIndex = 0;
+				this.draggedPiece = null;
+				this.prevSquare = null;
+
+				let moveColor = "White";
+				if (this.game.turn() === "b") {
+					moveColor = "Black";
+				}
+				if (this.game.in_checkmate()) {
+					this.status = `Game over, ${moveColor} is in checkmate.`
+				} else if (this.game.in_draw()) {
+					this.status = "Game over, drawn position.";
+				} else {
+					this.status = `${moveColor} to move.`;
+					if (this.game.in_check()) {
+						this.status += ` ${moveColor} is in check.`;
+					}
+				}
+				console.log(this.status)
+
+				return false;
+			}
 		};
 		this.element.onmousemove = (event) => {
 			if (this.dragging) {
@@ -64,17 +98,19 @@ export default class Board {
 			const bg = rank % 2 === fileNum % 2 ? "white" : "gray"
 			const square = new Square({ rank, file, bg });
 			this.element.appendChild(square.element);
+			square.fixSize();
 			this.squareElements.set(square.element, square);
 			this.squares[`${file}${rank}`] = square;
 		}
 
 		let squareSize = Object.values(this.squares)[0].size;
 
-		this.chess.board().forEach((rank, ri) => {
+		this.game.board().reverse().forEach((rank, ri) => {
 			rank.forEach((square, fi) => {
 				if (!(square === null)) {
-					const piece = new Piece({ type: `${square.color}${square.type}`, size: `${squareSize}px` });
+					const piece = new Piece({ color: square.color, type: square.type, size: `${squareSize}px` });
 					this.squares[`${files[fi]}${ri + 1}`].addPiece(piece.element);
+					this.pieceElements.set(piece.element, piece);
 				}
 			});
 		});
