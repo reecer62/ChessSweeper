@@ -17,35 +17,39 @@ public class ChessSweeperWebSocket {
 	
 	@OnWebSocketMessage
 	public void onText(Session session, String message) throws IOException {
-		// System.out.println("Message received:" + message);
+
+		String placeholder = "";
+		// Client requests a side
+		if(ChessRoom.getInstance().contains(this)) {
+			// Existing Client
+			if(placeholder.equals("get")) {
+				session.getRemote().sendString(ChessRoom.getInstance().getState());
+			} else {
+				ChessRoom.getInstance().updateState(this, message);
+			}
+		} else {
+			// New Client
+			if(placeholder.equals("Joinblack")) {
+				if(!ChessRoom.getInstance().joinBlack(this)) {
+					// "Black is not empty"
+				}
+				
+			} else if(placeholder.equals("Joinwhite")) {
+				if(!ChessRoom.getInstance().joinWhite(this)) {
+					// "Black is not empty"
+				}
+				
+			}
+		}
 
 		ChessRoom.getInstance().writeAllClients(message);
-		
-//		if (session.isOpen()) {
-//			String result = null;
-//			try {
-//				result = handleQuery(message); // TODO turn this into a ternary lol
-//			} catch (IllegalArgumentException e) {
-//				result = e.getMessage();
-//				System.err.print(e.getMessage() + " (" + message + ").");
-//			} catch (Exception e) {
-//				result = "Invalid JSON Query \"" + message + "\".";
-//				System.err.print("Invalid JSON Query \'" + message + "\'.");
-//			}
-//			if (result != null)
-//				session.getRemote().sendString(result);
-//		}
 	}
-
-//	public String handleQuery(String message) {
-//		return null; // TODO
-//	}
 
 	@OnWebSocketConnect
 	public void onConnect(Session session) throws IOException {
 		System.out.println("+" + session.getRemoteAddress().getHostString());
 		this.session = session;
-		ChessRoom.getInstance().join(this);
+		
 	}
 
 	@OnWebSocketClose
@@ -53,23 +57,83 @@ public class ChessSweeperWebSocket {
 		System.out.println("-" + session.getRemoteAddress().getHostString());
 		ChessRoom.getInstance().leave(this);
 	}
+	
 
 	public static class ChessRoom {
 		
 		private static final ChessRoom INSTANCE = new ChessRoom();
+		
+		private String gameState;
 
 		private List<ChessSweeperWebSocket> clients = new ArrayList<>();
+		
+		private ChessSweeperWebSocket clientBlack, clientWhite;
 
 		public static ChessRoom getInstance() {
 			return INSTANCE;
 		}
 		
-		public void join(ChessSweeperWebSocket socket) {
-			clients.add(socket);
+		public boolean joinBlack(ChessSweeperWebSocket socket) {
+			synchronized(this) {
+				if(clientBlack != null) {
+					return false;
+				}
+				clientBlack = socket;
+			}
+			return true;
+			
+		}
+		
+		public boolean isBlack(ChessSweeperWebSocket socket) {
+			return socket.session.getRemoteAddress().equals(clientBlack.session.getRemoteAddress());
+		}
+		
+		public boolean joinWhite(ChessSweeperWebSocket socket) {
+			synchronized(this) {
+				if(clientWhite != null) {
+					return false;
+				}
+				clientWhite = socket;
+			}
+			return true;
+		}
+		
+		public boolean isWhite(ChessSweeperWebSocket socket) {
+			return socket.session.getRemoteAddress().equals(clientWhite.session.getRemoteAddress());
+		}
+		
+		// State is client validated by the chess.js library
+		public void updateState(ChessSweeperWebSocket socket, String state) {
+			// Update the state with a monitor
+			synchronized(this) {
+				gameState = state;
+			}
+			
+			// Once the state is updated, the new value can safely be sent
+			// using the function argument
+			try {
+				writeOtherClient(socket, state);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		public String getState() {
+			return gameState;
 		}
 		
 		public void leave(ChessSweeperWebSocket socket) {
-			clients.remove(socket);
+			if(isBlack(socket)) {
+				clientBlack = null;
+			} if (isWhite(socket)) {
+				clientWhite = null;
+			} else {
+				// Not a player address
+			}
+		}
+		
+		public boolean contains(ChessSweeperWebSocket socket) {
+			return isBlack(socket) || isWhite(socket);
 		}
 		
 		public void writeAllClients(String message) {
@@ -79,6 +143,14 @@ public class ChessSweeperWebSocket {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+			}
+		}
+		
+		public void writeOtherClient(ChessSweeperWebSocket socket, String message) throws IOException {
+			if(isBlack(socket)) {
+				clientWhite.session.getRemote().sendString(message);
+			} else if(isWhite(socket)) {
+				clientBlack.session.getRemote().sendString(message);
 			}
 		}
 	}

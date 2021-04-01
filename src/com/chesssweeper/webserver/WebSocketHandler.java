@@ -9,8 +9,12 @@ public class WebSocketHandler {
 	
 	private static Server server;
 	
+	public static void main(String[] args) {
+		runWebServer();
+	}
+	
 	public static void runWebServer() {
-		server = new Server(8080);
+		server = new Server(8082);
 
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		

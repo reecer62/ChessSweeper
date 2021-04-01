@@ -1,0 +1,40 @@
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChessSweeper</title>
+
+    <script>
+        var webSocket;
+        function loadFunc() {
+            var url = "ws://173.95.165.30:8082/WS"
+
+            webSocket = new WebSocket(url);
+
+            webSocket.onopen = function (event) {
+                console.log("opened");
+
+            };
+
+            webSocket.onmessage = function (event) {
+                console.log(event.data);
+            }
+
+
+        }
+
+        function sendMessage()
+        {
+            webSocket.send(document.getElementById('input').value);
+        }
+    </script>
+
+    <link rel="stylesheet" href="normalize.min.css">
+    <link rel="stylesheet" href="main.css">
+
+<body onload='loadFunc()'>
+    <input type="text" id="input" name="lname">
+    <button onclick="sendMessage()">Send</button>
+</body>
+
+</html>
