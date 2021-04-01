@@ -119,16 +119,16 @@ export default class Board {
 		});
 	}
 
-	flipBoard(self) {
-		if (self.flipped) {
-			self.element.style.direction = "ltr";
+	flipBoard() {
+		if (this.flipped) {
+			this.element.style.direction = "ltr";
 		} else {
-			self.element.style.direction = "rtl";
+			this.element.style.direction = "rtl";
 		}
-		self.flipped = !self.flipped;
+		this.flipped = !this.flipped;
 
-		for (var i = 1; i < self.element.childNodes.length; i++) {
-			self.element.insertBefore(self.element.childNodes[i], self.element.firstChild);
+		for (var i = 1; i < this.element.childNodes.length; i++) {
+			this.element.insertBefore(this.element.childNodes[i], this.element.firstChild);
 		}
 	}
 }
