@@ -1,7 +1,7 @@
 import Network from "./components/Network.js";
 import Board from "./components/Board.js";
 
-const network = new Network({ ip: "173.95.165.30", port: "8082" });
+const network = new Network({ ip: "173.95.165.30", port: "8080" });
 const board = new Board({ selector: "#board", size: "400px", network });
 
 document.getElementById("flipBoard").onclick = () => {

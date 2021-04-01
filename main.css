@@ -119,7 +119,7 @@ body {
 	"b7 board board board board board board board board board board"
 	"b8 board board board board board board board board board board"
 	". board board board board board board board board board board"
-	". . ba bb bc bd be bf bg bh .";
+	". . bh bg bf be bd bc bb ba .";
 }
 
 .Square:nth-child() {

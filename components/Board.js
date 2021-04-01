@@ -13,7 +13,6 @@ export default class Board {
 
 		this.element = document.querySelector(selector);
 		this.element.classList.add("Board");
-		this.flipped = false;
 
 		this.game = new Chess();
 		this.status = "";
@@ -118,13 +117,6 @@ export default class Board {
 	}
 
 	flipBoard() {
-		if (this.flipped) {
-			this.element.style.direction = "ltr";
-		} else {
-			this.element.style.direction = "rtl";
-		}
-		this.flipped = !this.flipped;
-
 		for (var i = 1; i < this.element.childNodes.length; i++) {
 			this.element.insertBefore(this.element.childNodes[i], this.element.firstChild);
 		}
