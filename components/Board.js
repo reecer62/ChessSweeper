@@ -15,6 +15,10 @@ export default class Board {
 		this.flipped = false;
 
 		this.game = new Chess();
+		this.status = "";
+
+		this.element.style.width = this.size;
+		this.element.style.height = this.size;
 
 		this.init();
 
@@ -22,8 +26,6 @@ export default class Board {
 		this.lastMousePos = [];
 		this.draggedPiece;
 		this.prevSquare;
-		this.status = "White to move.";
-		console.log(this.status)
 		this.element.onmousedown = (event) => {
 			if (this.game.game_over()) {
 				return false;
@@ -91,9 +93,6 @@ export default class Board {
 	}
 
 	init() {
-		this.element.style.width = this.size;
-		this.element.style.height = this.size;
-
 		for (let i = 0; i < 64; i++) {
 			const rank = 8 - Math.floor(i / 8);
 			const fileNum = i % 8;
@@ -106,17 +105,9 @@ export default class Board {
 			this.squares[`${file}${rank}`] = square;
 		}
 
-		let squareSize = Object.values(this.squares)[0].size;
+		this.squareSize = Object.values(this.squares)[0].size;
 
-		this.game.board().reverse().forEach((rank, ri) => {
-			rank.forEach((square, fi) => {
-				if (!(square === null)) {
-					const piece = new Piece({ color: square.color, type: square.type, size: `${squareSize}px` });
-					this.squares[`${files[fi]}${ri + 1}`].addPiece(piece.element);
-					this.pieceElements.set(piece.element, piece);
-				}
-			});
-		});
+		this.setBoard();
 	}
 
 	flipBoard() {
@@ -130,5 +121,27 @@ export default class Board {
 		for (var i = 1; i < this.element.childNodes.length; i++) {
 			this.element.insertBefore(this.element.childNodes[i], this.element.firstChild);
 		}
+	}
+
+	resetBoard() {
+		this.game.reset();
+		Object.values(this.squares).forEach((square) => {
+			square.clear();
+		});
+		this.setBoard();
+	}
+
+	setBoard() {
+		this.game.board().reverse().forEach((rank, ri) => {
+			rank.forEach((square, fi) => {
+				if (!(square === null)) {
+					const piece = new Piece({ color: square.color, type: square.type, size: `${this.squareSize}px` });
+					this.squares[`${files[fi]}${ri + 1}`].addPiece(piece.element);
+					this.pieceElements.set(piece.element, piece);
+				}
+			});
+		});
+		this.status = "White to move.";
+		console.log(this.status)
 	}
 }

@@ -5,3 +5,6 @@ document.getElementById("flipBoard").onclick = () => {
 	document.getElementById("boardContainer").classList.toggle("flipped");
 	board.flipBoard();
 };
+document.getElementById("resetBoard").onclick = () => {
+	board.resetBoard();
+};

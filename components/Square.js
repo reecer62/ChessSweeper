@@ -22,8 +22,15 @@ export default class Square {
 	}
 
 	removePiece(piece) {
+		if (this.piece !== null) {
+			this.piece = null;
+			this.element.removeChild(piece);
+		}
+	}
+
+	clear() {
 		this.piece = null;
-		this.element.removeChild(piece);
+		this.element.textContent = "";
 	}
 
 	fixSize() {
