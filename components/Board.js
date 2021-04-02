@@ -4,9 +4,10 @@ import Square from "./Square.js";
 const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 export default class Board {
-	constructor({ selector, size, network }) {
+	constructor({ selector, size, network, statusCB }) {
 		this.size = size;
 		this.network = network;
+		this.statusCB = statusCB;
 		this.squares = {}; //board positions to class objects
 		this.squareElements = new Map(); //dom objects to class objects
 		this.pieceElements = new Map(); //dom objects to class objects
@@ -33,7 +34,7 @@ export default class Board {
 			if (Array.prototype.slice.call(event.target.classList).includes("Piece") && this.game.turn() === this.pieceElements.get(event.target).color) {
 				event.preventDefault();
 				this.dragging = true;
-				this.prevSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => Array.prototype.slice.call(e.classList).includes("Square")));
+				this.prevSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Square")));
 				this.lastMousePos = [event.clientX, event.clientY];
 				this.draggedPiece = event.target;
 				this.draggedPiece.style.position = "absolute";
@@ -46,7 +47,7 @@ export default class Board {
 				event.preventDefault();
 				this.dragging = false;
 				this.lastMousePos = [];
-				const newSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => Array.prototype.slice.call(e.classList).includes("Square")));
+				const newSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Square")));
 				if (newSquare !== undefined) {
 					const move = this.game.move({
 						from: this.prevSquare.position,
@@ -67,23 +68,24 @@ export default class Board {
 						}
 						if (this.game.in_checkmate()) {
 							this.status = `Game over, ${moveColor} is in checkmate.`
+						} else if (this.game.insufficient_material()) {
+							this.status = "Game over, insufficient material.";
 						} else if (this.game.in_draw()) {
 							this.status = "Game over, drawn position.";
 						} else if (this.game.in_stalemate()) {
 							this.status = "Game over, stalemate position.";
 						} else if (this.game.in_threefold_repetition()) {
 							this.status = "Game over, threefold repetition rule.";
-						} else if (this.game.insufficient_material()) {
-							this.status = "Game over, insufficient material.";
 						} else {
 							this.status = `${moveColor} to move.`;
 							if (this.game.in_check()) {
 								this.status += ` ${moveColor} is in check.`;
 							}
 						}
-						console.log(this.status)
+						this.statusCB(this.status);
 					}
 				}
+
 				this.draggedPiece.style.top = null;
 				this.draggedPiece.style.left = null;
 				this.draggedPiece.style.position = null;
@@ -111,7 +113,7 @@ export default class Board {
 			const rank = 8 - Math.floor(i / 8);
 			const fileNum = i % 8;
 			const file = files[fileNum];
-			const bg = rank % 2 === fileNum % 2 ? "white" : "gray"
+			const bg = rank % 2 === fileNum % 2 ? "light" : "dark";
 			const square = new Square({ rank, file, bg });
 			this.element.appendChild(square.element);
 			square.fixSize();
@@ -139,9 +141,12 @@ export default class Board {
 	}
 
 	setBoard() {
+		Object.values(this.squares).forEach((s) => {
+			s.raise();
+		});
 		this.game.board().reverse().forEach((rank, ri) => {
 			rank.forEach((square, fi) => {
-				if (!(square === null)) {
+				if (square !== null) {
 					const piece = new Piece({ color: square.color, type: square.type, size: `${this.squareSize}px` });
 					this.squares[`${files[fi]}${ri + 1}`].addPiece(piece.element);
 					this.pieceElements.set(piece.element, piece);
@@ -149,6 +154,6 @@ export default class Board {
 			});
 		});
 		this.status = "White to move.";
-		console.log(this.status)
+		this.statusCB(this.status);
 	}
 }

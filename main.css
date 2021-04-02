@@ -87,7 +87,7 @@ body {
 	justify-content: center;
 	align-items: center;
 	padding: 5px;
-	-webkit-user-select: none;     
+	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
@@ -96,8 +96,8 @@ body {
 
 #boardContainer {
 	display: grid;
-	grid-template-rows: 10px repeat(8, auto) 10px auto;
-	grid-template-columns: auto 10px repeat(8, auto) 10px;
+	grid-template-rows: 10px repeat(8, 1fr) 10px auto;
+	grid-template-columns: auto 10px repeat(8, 1fr) 10px;
 	grid-template-areas:
 	". board board board board board board board board board board"
 	"b8 board board board board board board board board board board"
@@ -127,10 +127,22 @@ body {
 	". . bh bg bf be bd bc bb ba .";
 }
 
-.Square:nth-child() {
-	background: black;
+.light.raised {
+    box-shadow: var(--raisedSize) var(--raisedSize) #f4edda inset,
+				calc(var(--raisedSize) * -1) calc(var(--raisedSize) * -1) #b3ac99 inset;
 }
 
-.Square:nth-child(2n) {
-	background: white;
+.dark.raised {
+	box-shadow: var(--raisedSize) var(--raisedSize) #d8c1b1 inset,
+				calc(var(--raisedSize) * -1) calc(var(--raisedSize) * -1) #9a8073 inset;
+}
+
+.light.sunken {
+	box-shadow: var(--sunkenSize) var(--sunkenSize) #b3ac99 inset,
+				calc(var(--sunkenSize) * -1) calc(var(--sunkenSize) * -1) #f4edda inset;
+}
+
+.dark.sunken {
+	box-shadow: var(--sunkenSize) var(--sunkenSize) #9a8073 inset,
+				calc(var(--sunkenSize) * -1) calc(var(--sunkenSize) * -1) #d8c1b1 inset;
 }
