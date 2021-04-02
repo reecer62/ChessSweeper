@@ -6,6 +6,7 @@ export default class Piece {
 	constructor({ type, color, size }) {
 		this.type = type;
 		this.color = color;
+
 		this.element = document.createElement("img");
 		this.element.setAttribute("src", `assets/${color}${type}.png`);
 		this.element.classList.add("Piece");

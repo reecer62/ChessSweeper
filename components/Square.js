@@ -4,17 +4,23 @@ export default class Square {
 	constructor({ rank, file, bg }) {
 		this.rank = rank;
 		this.file = file;
+		this.piece = null;
+		this.msStatus = "";
+		this.flag = null;
+		this.clickedOn = false;
+
 		this.element = document.createElement("div");
 		this.element.classList.add("Square");
 		this.element.classList.add(bg);
 		this.element.style.background = bg == "light" ? "#d7ccba" : "#bda193";
-		this.piece = null;
-		this.msStatus = "";
-		this.flag = null;
 
 		this.element.onmouseup = (event) => {
-			if (this.msStatus == "raised" && this.piece === null) {
+			if (this.clickedOn && this.msStatus == "raised" && this.piece === null) {
 				if (event.button == 0) {
+					if (this.flag) {
+						this.element.removeChild(this.flag);
+						this.flag = null;
+					}
 					this.sink();
 				} else if (event.button == 2) {
 					if (this.flag) {
@@ -29,6 +35,11 @@ export default class Square {
 					}
 				}
 			}
+			this.clickedOn = false;
+		};
+
+		this.element.onmousedown = (event) => {
+			this.clickedOn = true;
 		};
 	}
 

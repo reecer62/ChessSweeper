@@ -11,25 +11,23 @@ export default class Board {
 		this.squares = {}; //board positions to class objects
 		this.squareElements = new Map(); //dom objects to class objects
 		this.pieceElements = new Map(); //dom objects to class objects
+		this.game = new Chess();
+		this.status = "";
+		this.dragging = false;
+		this.lastMousePos = [];
+		this.draggedPiece;
+		this.prevSquare;
 
 		this.element = document.querySelector(selector);
 		this.element.classList.add("Board");
-
-		this.game = new Chess();
-		this.status = "";
-
 		this.element.style.width = this.size;
 		this.element.style.height = this.size;
 
 		this.init();
 
-		this.dragging = false;
-		this.lastMousePos = [];
-		this.draggedPiece;
-		this.prevSquare;
 		this.element.onmousedown = (event) => {
 			if (this.game.game_over()) {
-				return false;
+				return;
 			}
 			if (event.target.classList.contains("Piece") && this.game.turn() === this.pieceElements.get(event.target).color) {
 				event.preventDefault();
