@@ -8,7 +8,7 @@ export default class Piece {
 		this.color = color;
 
 		this.element = document.createElement("img");
-		this.element.setAttribute("src", `assets/${color}${type}.png`);
+		this.element.setAttribute("src", `assets/chess/${color}${type}.png`);
 		this.element.classList.add("Piece");
 		if (color == "b") {
 			this.element.classList.add("black");

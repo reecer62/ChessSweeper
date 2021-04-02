@@ -54,10 +54,15 @@ export default class Board {
 					if (move !== null) {
 						if (move.promotion === "q") {
 							const piece = this.pieceElements.get(this.draggedPiece);
-							piece.element.setAttribute("src", `assets/${piece.color}q.png`);
+							piece.element.setAttribute("src", `assets/chess/${piece.color}q.png`);
 						}
 						this.prevSquare.removePiece(this.draggedPiece);
-						newSquare.addPiece(this.draggedPiece);
+						if (newSquare.hasMine()) {
+							newSquare.sink();
+							this.game.remove(newSquare.position);
+						} else {
+							newSquare.addPiece(this.draggedPiece);
+						}
 
 						let moveColor = "White";
 						if (this.game.turn() === "b") {
@@ -67,8 +72,6 @@ export default class Board {
 							this.status = `Game over, ${moveColor} is in checkmate.`
 						} else if (this.game.insufficient_material()) {
 							this.status = "Game over, insufficient material.";
-						} else if (this.game.in_draw()) {
-							this.status = "Game over, drawn position.";
 						} else if (this.game.in_stalemate()) {
 							this.status = "Game over, stalemate position.";
 						} else if (this.game.in_threefold_repetition()) {
@@ -136,9 +139,7 @@ export default class Board {
 	}
 
 	setBoard() {
-		Object.values(this.squares).forEach((s) => {
-			s.raise();
-		});
+		this.setMSBoard();
 		this.game.board().reverse().forEach((rank, ri) => {
 			rank.forEach((square, fi) => {
 				if (square !== null) {
@@ -150,5 +151,22 @@ export default class Board {
 		});
 		this.status = "White to move.";
 		this.statusCB(this.status);
+	}
+
+	setMSBoard() {
+		let mineLocs = [];
+		while (mineLocs.length < 10) {
+			let loc = Math.floor(Math.random() * Object.keys(this.squares).length);
+			if (mineLocs.indexOf(loc) === -1) {
+				mineLocs.push(loc);
+			}
+		}
+
+		Object.values(this.squares).forEach((s, index) => {
+			if (mineLocs.indexOf(index) !== -1) {
+				s.addmine();
+			}
+			s.raise();
+		});
 	}
 }

@@ -8,6 +8,7 @@ export default class Square {
 		this.msStatus = "";
 		this.flag = null;
 		this.clickedOn = false;
+		this.mine = null;
 
 		this.element = document.createElement("div");
 		this.element.classList.add("Square");
@@ -17,18 +18,18 @@ export default class Square {
 		this.element.onmouseup = (event) => {
 			if (this.clickedOn && this.msStatus == "raised" && this.piece === null) {
 				if (event.button == 0) {
-					if (this.flag) {
+					if (this.flag !== null) {
 						this.element.removeChild(this.flag);
 						this.flag = null;
 					}
 					this.sink();
 				} else if (event.button == 2) {
-					if (this.flag) {
+					if (this.flag !== null) {
 						this.element.removeChild(this.flag);
 						this.flag = null;
 					} else {
 						this.flag = document.createElement("img");
-						this.flag.setAttribute("src", "assets/flag.png");
+						this.flag.setAttribute("src", "assets/minesweeper/flag.png");
 						this.flag.style.width = `${this.element.clientWidth}px`;
 						this.flag.style.height = `${this.element.clientHeight}px`;
 						this.element.appendChild(this.flag);
@@ -47,6 +48,9 @@ export default class Square {
 		if (this.piece !== null) {
 			this.element.removeChild(this.piece);
 		}
+		if (this.flag !== null) {
+			this.element.removeChild(this.flag);
+		}
 		this.piece = piece;
 		this.element.appendChild(piece);
 	}
@@ -56,6 +60,24 @@ export default class Square {
 			this.piece = null;
 			this.element.removeChild(piece);
 		}
+	}
+
+	removeFlag() {
+		if (this.flag !== null) {
+			this.element.removeChild(this.flag);
+			this.flag = null;
+		}
+	}
+
+	addmine() {
+		this.mine = document.createElement("img");
+		this.mine.setAttribute("src", "assets/minesweeper/mine.png");
+		this.mine.style.width = `${this.element.clientWidth}px`;
+		this.mine.style.height = `${this.element.clientHeight}px`;
+	}
+
+	hasMine() {
+		return (this.mine !== null);
 	}
 
 	clear() {
@@ -80,6 +102,9 @@ export default class Square {
 		this.element.classList.remove("raised");
 		this.element.classList.add("sunken");
 		this.msStatus = "sunken";
+		if (this.mine !== null) {
+			this.element.appendChild(this.mine);
+		}
 	}
 
 	get size() {
