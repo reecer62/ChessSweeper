@@ -1,0 +1,2 @@
+make minesweeper reset every move
+make piece on mine disappear if taken
