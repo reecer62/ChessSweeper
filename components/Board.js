@@ -47,36 +47,38 @@ export default class Board {
 				this.dragging = false;
 				this.lastMousePos = [];
 				const newSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => Array.prototype.slice.call(e.classList).includes("Square")));
-				const move = this.game.move({
-					from: this.prevSquare.position,
-					to: newSquare.position,
-					promotion: "q"
-				});
-				if (move !== null) {
-					this.prevSquare.removePiece(this.draggedPiece);
-					newSquare.addPiece(this.draggedPiece);
+				if (newSquare !== undefined) {
+					const move = this.game.move({
+						from: this.prevSquare.position,
+						to: newSquare.position,
+						promotion: "q"
+					});
+					if (move !== null) {
+						this.prevSquare.removePiece(this.draggedPiece);
+						newSquare.addPiece(this.draggedPiece);
 
-					let moveColor = "White";
-					if (this.game.turn() === "b") {
-						moveColor = "Black";
-					}
-					if (this.game.in_checkmate()) {
-						this.status = `Game over, ${moveColor} is in checkmate.`
-					} else if (this.game.in_draw()) {
-						this.status = "Game over, drawn position.";
-					} else if (this.game.in_stalemate()) {
-						this.status = "Game over, stalemate position.";
-					} else if (this.game.in_threefold_repetition()) {
-						this.status = "Game over, threefold repetition rule.";
-					} else if (this.game.insufficient_material()) {
-						this.status = "Game over, insufficient material.";
-					} else {
-						this.status = `${moveColor} to move.`;
-						if (this.game.in_check()) {
-							this.status += ` ${moveColor} is in check.`;
+						let moveColor = "White";
+						if (this.game.turn() === "b") {
+							moveColor = "Black";
 						}
+						if (this.game.in_checkmate()) {
+							this.status = `Game over, ${moveColor} is in checkmate.`
+						} else if (this.game.in_draw()) {
+							this.status = "Game over, drawn position.";
+						} else if (this.game.in_stalemate()) {
+							this.status = "Game over, stalemate position.";
+						} else if (this.game.in_threefold_repetition()) {
+							this.status = "Game over, threefold repetition rule.";
+						} else if (this.game.insufficient_material()) {
+							this.status = "Game over, insufficient material.";
+						} else {
+							this.status = `${moveColor} to move.`;
+							if (this.game.in_check()) {
+								this.status += ` ${moveColor} is in check.`;
+							}
+						}
+						console.log(this.status)
 					}
-					console.log(this.status)
 				}
 				this.draggedPiece.style.top = null;
 				this.draggedPiece.style.left = null;
