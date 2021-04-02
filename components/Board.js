@@ -53,6 +53,10 @@ export default class Board {
 					promotion: "q"
 				});
 				if (move !== null) {
+					if (move.promotion === "q") {
+						const piece = this.pieceElements.get(this.draggedPiece);
+						piece.element.setAttribute("src", `assets/${piece.color}q.png`);
+					}
 					this.prevSquare.removePiece(this.draggedPiece);
 					newSquare.addPiece(this.draggedPiece);
 
