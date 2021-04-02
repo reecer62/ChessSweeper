@@ -78,6 +78,8 @@ export default class Board {
 					}
 					console.log(this.status)
 				}
+				this.draggedPiece.style.top = null;
+				this.draggedPiece.style.left = null;
 				this.draggedPiece.style.position = null;
 				this.draggedPiece.style.zIndex = 0;
 				this.draggedPiece = null;
