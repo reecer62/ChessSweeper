@@ -36,7 +36,7 @@ export default class Square {
 		this.element.style.maxHeight = `${this.element.clientHeight}px`;
 		this.element.style.maxWidth = `${this.element.clientWidth}px`;
 		this.element.style.setProperty("--raisedSize", `${this.element.clientHeight / 10}px`);
-		this.element.style.setProperty("--sunkenSize", `${this.element.clientHeight / 20} px`);
+		this.element.style.setProperty("--sunkenSize", `${this.element.clientHeight / 20}px`);
 	}
 
 	raise() {
