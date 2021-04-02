@@ -1,14 +1,17 @@
 export default class Square {
 	element;
 
-	constructor({ rank, file, bg }) {
+	constructor({ rank, file, bg, mineCB }) {
 		this.rank = rank;
 		this.file = file;
+		this.mineCB = mineCB;
+
 		this.piece = null;
 		this.msStatus = "";
 		this.flag = null;
 		this.clickedOn = false;
 		this.mine = null;
+		this.canClick = true;
 
 		this.element = document.createElement("div");
 		this.element.classList.add("Square");
@@ -16,13 +19,16 @@ export default class Square {
 		this.element.style.background = bg == "light" ? "#d7ccba" : "#bda193";
 
 		this.element.onmouseup = (event) => {
-			if (this.clickedOn && this.msStatus == "raised" && this.piece === null) {
+			if (this.canClick && this.clickedOn && this.msStatus == "raised" && this.piece === null) {
 				if (event.button == 0) {
 					if (this.flag !== null) {
 						this.element.removeChild(this.flag);
 						this.flag = null;
 					}
 					this.sink();
+					if (this.mine !== null) {
+						this.mineCB();
+					}
 				} else if (event.button == 2) {
 					if (this.flag !== null) {
 						this.element.removeChild(this.flag);
@@ -81,8 +87,13 @@ export default class Square {
 	}
 
 	clear() {
-		this.piece = null;
 		this.element.textContent = "";
+		this.piece = null;
+		this.msStatus = "";
+		this.flag = null;
+		this.clickedOn = false;
+		this.mine = null;
+		this.canClick = true;
 	}
 
 	fixSize() {
@@ -105,6 +116,10 @@ export default class Square {
 		if (this.mine !== null) {
 			this.element.appendChild(this.mine);
 		}
+	}
+
+	disableClicks() {
+		this.canClick = false;
 	}
 
 	get size() {

@@ -70,12 +70,16 @@ export default class Board {
 						}
 						if (this.game.in_checkmate()) {
 							this.status = `Game over, ${moveColor} is in checkmate.`
+							this.disableClicks();
 						} else if (this.game.insufficient_material()) {
 							this.status = "Game over, insufficient material.";
+							this.disableClicks();
 						} else if (this.game.in_stalemate()) {
 							this.status = "Game over, stalemate position.";
+							this.disableClicks();
 						} else if (this.game.in_threefold_repetition()) {
 							this.status = "Game over, threefold repetition rule.";
+							this.disableClicks();
 						} else {
 							this.status = `${moveColor} to move.`;
 							if (this.game.in_check()) {
@@ -112,7 +116,22 @@ export default class Board {
 			const fileNum = i % 8;
 			const file = files[fileNum];
 			const bg = rank % 2 === fileNum % 2 ? "light" : "dark";
-			const square = new Square({ rank, file, bg });
+			const square = new Square({
+				rank,
+				file,
+				bg,
+				mineCB: () => {
+					let moveColor = "White";
+					let notMoveColor = "Black";
+					if (this.game.turn() === "b") {
+						moveColor = "Black";
+						notMoveColor = "White";
+					}
+					this.status = `${moveColor} blew up! ${notMoveColor} to move.`;
+					this.swapTurn();
+					this.statusCB(this.status);
+				}
+			});
 			this.element.appendChild(square.element);
 			square.fixSize();
 			this.squareElements.set(square.element, square);
@@ -122,6 +141,12 @@ export default class Board {
 		this.squareSize = Object.values(this.squares)[0].size;
 
 		this.setBoard();
+	}
+
+	swapTurn() {
+		let tokens = this.game.fen().split(" ");
+		tokens[1] = this.game.turn() === "b" ? "w" : "b";
+		this.game.load(tokens.join(" "));
 	}
 
 	flipBoard() {
@@ -167,6 +192,12 @@ export default class Board {
 				s.addmine();
 			}
 			s.raise();
+		});
+	}
+
+	disableClicks() {
+		Object.values(this.squares).forEach((s) => {
+			s.disableClicks();
 		});
 	}
 }
