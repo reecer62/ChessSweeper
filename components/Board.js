@@ -128,6 +128,7 @@ export default class Board {
 						notMoveColor = "White";
 					}
 					this.status = `${moveColor} blew up! ${notMoveColor} to move.`;
+					this.swapTurn();
 					this.statusCB(this.status);
 				}
 			});
@@ -142,11 +143,11 @@ export default class Board {
 		this.setBoard();
 	}
 
-	// swapTurn() {
-	// 	let tokens = this.game.fen().split(" ");
-	// 	tokens[1] = this.game.turn() === "b" ? "w" : "b";
-	// 	this.game.load(tokens.join(" "));
-	// }
+	swapTurn() {
+		let tokens = this.game.fen().split(" ");
+		tokens[1] = this.game.turn() === "b" ? "w" : "b";
+		this.game.load(tokens.join(" "));
+	}
 
 	flipBoard() {
 		for (var i = 1; i < this.element.childNodes.length; i++) {
