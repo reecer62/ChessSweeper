@@ -31,7 +31,7 @@ export default class Board {
 			if (this.game.game_over()) {
 				return false;
 			}
-			if (Array.prototype.slice.call(event.target.classList).includes("Piece") && this.game.turn() === this.pieceElements.get(event.target).color) {
+			if (event.target.classList.contains("Piece") && this.game.turn() === this.pieceElements.get(event.target).color) {
 				event.preventDefault();
 				this.dragging = true;
 				this.prevSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Square")));
@@ -40,7 +40,6 @@ export default class Board {
 				this.draggedPiece.style.position = "absolute";
 				this.draggedPiece.style.zIndex = 1;
 			}
-			return false;
 		}
 		this.element.onmouseup = (event) => {
 			if (this.dragging) {
@@ -92,8 +91,6 @@ export default class Board {
 				this.draggedPiece.style.zIndex = 0;
 				this.draggedPiece = null;
 				this.prevSquare = null;
-
-				return false;
 			}
 		};
 		this.element.onmousemove = (event) => {

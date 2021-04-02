@@ -10,6 +10,26 @@ export default class Square {
 		this.element.style.background = bg == "light" ? "#d7ccba" : "#bda193";
 		this.piece = null;
 		this.msStatus = "";
+		this.flag = null;
+
+		this.element.onmouseup = (event) => {
+			if (this.msStatus == "raised" && this.piece === null) {
+				if (event.button == 0) {
+					this.sink();
+				} else if (event.button == 2) {
+					if (this.flag) {
+						this.element.removeChild(this.flag);
+						this.flag = null;
+					} else {
+						this.flag = document.createElement("img");
+						this.flag.setAttribute("src", "assets/flag.png");
+						this.flag.style.width = `${this.element.clientWidth}px`;
+						this.flag.style.height = `${this.element.clientHeight}px`;
+						this.element.appendChild(this.flag);
+					}
+				}
+			}
+		};
 	}
 
 	addPiece(piece) {

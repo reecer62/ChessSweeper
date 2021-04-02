@@ -128,21 +128,21 @@ body {
 }
 
 .light.raised {
-    box-shadow: var(--raisedSize) var(--raisedSize) #f4edda inset,
-				calc(var(--raisedSize) * -1) calc(var(--raisedSize) * -1) #b3ac99 inset;
+    box-shadow: var(--raisedSize) var(--raisedSize) 0.5px #f4edda inset,
+				calc(var(--raisedSize) * -1) calc(var(--raisedSize) * -1) 0.5px #b3ac99 inset;
 }
 
 .dark.raised {
-	box-shadow: var(--raisedSize) var(--raisedSize) #d8c1b1 inset,
-				calc(var(--raisedSize) * -1) calc(var(--raisedSize) * -1) #9a8073 inset;
+	box-shadow: var(--raisedSize) var(--raisedSize) 0.5px #d8c1b1 inset,
+				calc(var(--raisedSize) * -1) calc(var(--raisedSize) * -1) 0.5px #9a8073 inset;
 }
 
 .light.sunken {
-	box-shadow: var(--sunkenSize) var(--sunkenSize) #b3ac99 inset,
-				calc(var(--sunkenSize) * -1) calc(var(--sunkenSize) * -1) #f4edda inset;
+	box-shadow: var(--sunkenSize) var(--sunkenSize) 0.5px #b3ac99 inset,
+				calc(var(--sunkenSize) * -1) calc(var(--sunkenSize) * -1) 0.5px #f4edda inset;
 }
 
 .dark.sunken {
-	box-shadow: var(--sunkenSize) var(--sunkenSize) #9a8073 inset,
-				calc(var(--sunkenSize) * -1) calc(var(--sunkenSize) * -1) #d8c1b1 inset;
+	box-shadow: var(--sunkenSize) var(--sunkenSize) 0.5px #9a8073 inset,
+				calc(var(--sunkenSize) * -1) calc(var(--sunkenSize) * -1) 0.5px #d8c1b1 inset;
 }
