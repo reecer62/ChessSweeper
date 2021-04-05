@@ -17,6 +17,7 @@ export default class Board {
 		this.lastMousePos = [];
 		this.draggedPiece;
 		this.prevSquare;
+		this.gameOver = false;
 
 		this.element = document.querySelector(selector);
 		this.element.classList.add("Board");
@@ -26,7 +27,7 @@ export default class Board {
 		this.init();
 
 		this.element.onmousedown = (event) => {
-			if (this.game.game_over()) {
+			if (this.game.game_over() || this.gameOver) {
 				return;
 			}
 			if (event.target.classList.contains("Piece") && this.game.turn() === this.pieceElements.get(event.target).color) {
@@ -56,34 +57,45 @@ export default class Board {
 							const piece = this.pieceElements.get(this.draggedPiece);
 							piece.element.setAttribute("src", `assets/chess/${piece.color}q.png`);
 						}
-						this.prevSquare.removePiece(this.draggedPiece);
+						this.prevSquare.removePiece();
 						if (newSquare.hasMine()) {
-							newSquare.sink();
+							if (move.piece === "k") {
+								if (move.color === "b") {
+									this.status = "Game over, Black's king blew up!";
+								} else {
+									this.status = "Game over, White's king blew up!";
+								}
+								this.gameOver = true;
+							}
 							this.game.remove(newSquare.position);
+							newSquare.removePiece();
 						} else {
 							newSquare.addPiece(this.draggedPiece);
 						}
 
-						let moveColor = "White";
-						if (this.game.turn() === "b") {
-							moveColor = "Black";
-						}
-						if (this.game.in_checkmate()) {
-							this.status = `Game over, ${moveColor} is in checkmate.`
-							this.disableClicks();
-						} else if (this.game.insufficient_material()) {
-							this.status = "Game over, insufficient material.";
-							this.disableClicks();
-						} else if (this.game.in_stalemate()) {
-							this.status = "Game over, stalemate position.";
-							this.disableClicks();
-						} else if (this.game.in_threefold_repetition()) {
-							this.status = "Game over, threefold repetition rule.";
-							this.disableClicks();
-						} else {
-							this.status = `${moveColor} to move.`;
-							if (this.game.in_check()) {
-								this.status += ` ${moveColor} is in check.`;
+						if (!this.gameOver) {
+							let moveColor = "White";
+							if (this.game.turn() === "b") {
+								moveColor = "Black";
+							}
+							if (this.game.in_checkmate()) {
+								this.status = `Game over, ${moveColor} is in checkmate.`
+								this.disableClicks();
+							} else if (this.game.insufficient_material()) {
+								this.status = "Game over, insufficient material.";
+								this.disableClicks();
+							} else if (this.game.in_stalemate()) {
+								this.status = "Game over, stalemate position.";
+								this.disableClicks();
+							// } else if (this.game.in_threefold_repetition()) {
+							// 	this.status = "Game over, threefold repetition rule.";
+							// 	this.disableClicks();
+							} else {
+								this.status = `${moveColor} to move.`;
+								if (this.game.in_check()) {
+									this.status += ` ${moveColor} is in check.`;
+								}
+								this.setMSBoard();
 							}
 						}
 						this.statusCB(this.status);
@@ -130,6 +142,7 @@ export default class Board {
 					this.status = `${moveColor} blew up! ${notMoveColor} to move.`;
 					this.swapTurn();
 					this.statusCB(this.status);
+					this.setMSBoard();
 				}
 			});
 			this.element.appendChild(square.element);
@@ -156,6 +169,7 @@ export default class Board {
 	}
 
 	resetBoard() {
+		this.gameOver = false;
 		this.game.reset();
 		Object.values(this.squares).forEach((square) => {
 			square.clear();
@@ -186,12 +200,16 @@ export default class Board {
 				mineLocs.push(loc);
 			}
 		}
+		if (!mineLocs.includes(0)) {
+			mineLocs[0] = 0;
+		}
 
 		Object.values(this.squares).forEach((s, index) => {
+			s.resetMS();
 			if (mineLocs.indexOf(index) !== -1) {
-				s.addmine();
+				s.addMine();
 			}
-			s.raise();
+			//calculate surrounding square indices
 		});
 	}
 

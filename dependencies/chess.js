@@ -1002,12 +1002,6 @@ var Chess = function (fen) {
 
 		var move = old.move
 
-		//EDIT
-		if (board[move.to] === null) {
-			return move
-		}
-		//END EDIT
-
 		kings = old.kings
 		turn = old.turn
 		castling = old.castling

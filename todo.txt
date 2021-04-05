@@ -1,3 +1,5 @@
-make minesweeper reset every move
-make piece on mine disappear if taken
-if king steps on mine, end game
+make bomb blow up more visually apparent
+make pieces dragged off the board work???
+make numbers next to bombs
+make empty spaces chain when clicked
+make threefold repetition not break all the time

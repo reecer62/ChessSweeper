@@ -12,6 +12,8 @@ export default class Square {
 		this.clickedOn = false;
 		this.mine = null;
 		this.canClick = true;
+		this.adjacentMines = 0;
+		this.mineCount = null;
 
 		this.element = document.createElement("div");
 		this.element.classList.add("Square");
@@ -61,10 +63,10 @@ export default class Square {
 		this.element.appendChild(piece);
 	}
 
-	removePiece(piece) {
+	removePiece() {
 		if (this.piece !== null) {
+			this.element.removeChild(this.piece);
 			this.piece = null;
-			this.element.removeChild(piece);
 		}
 	}
 
@@ -75,15 +77,28 @@ export default class Square {
 		}
 	}
 
-	addmine() {
+	addMine() {
 		this.mine = document.createElement("img");
 		this.mine.setAttribute("src", "assets/minesweeper/mine.png");
 		this.mine.style.width = `${this.element.clientWidth}px`;
 		this.mine.style.height = `${this.element.clientHeight}px`;
 	}
 
+	removeMine() {
+		if (this.mine !== null) {
+			if (this.msStatus == "sunken") {
+				this.element.removeChild(this.mine);
+			}
+			this.mine = null;
+		}
+	}
+
 	hasMine() {
 		return (this.mine !== null);
+	}
+
+	addAdjacentMine() {
+		this.adjacentMines++;
 	}
 
 	clear() {
@@ -94,6 +109,8 @@ export default class Square {
 		this.clickedOn = false;
 		this.mine = null;
 		this.canClick = true;
+		this.adjacentMines = 0;
+		this.mineCount = null;
 	}
 
 	fixSize() {
@@ -107,6 +124,10 @@ export default class Square {
 		this.element.classList.remove("sunken");
 		this.element.classList.add("raised");
 		this.msStatus = "raised";
+		if (this.mineCount !== null) {
+			this.element.removeChild(this.mineCount);
+			this.mineCount = null;
+		}
 	}
 
 	sink() {
@@ -115,7 +136,17 @@ export default class Square {
 		this.msStatus = "sunken";
 		if (this.mine !== null) {
 			this.element.appendChild(this.mine);
+		} else if (this.adjacentMines !== 0) {
+			this.mineCount = document.createTextNode(this.adjacentMines);
+			this.element.appendChild(this.mineCount);
 		}
+	}
+	
+	resetMS() {
+		this.removeMine();
+		this.removeFlag();
+		this.raise();
+		this.adjacentMines = 0;
 	}
 
 	disableClicks() {
