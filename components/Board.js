@@ -25,101 +25,6 @@ export default class Board {
 		this.element.style.height = this.size;
 
 		this.init();
-
-		this.element.onmousedown = (event) => {
-			if (this.game.game_over() || this.gameOver) {
-				return;
-			}
-			if (event.target.classList.contains("Piece") && this.game.turn() === this.pieceElements.get(event.target).color) {
-				event.preventDefault();
-				this.dragging = true;
-				this.prevSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Square")));
-				this.lastMousePos = [event.clientX, event.clientY];
-				this.draggedPiece = event.target;
-				this.draggedPiece.style.position = "absolute";
-				this.draggedPiece.style.zIndex = 1;
-			}
-		}
-		this.element.onmouseup = (event) => {
-			if (this.dragging) {
-				event.preventDefault();
-				this.dragging = false;
-				this.lastMousePos = [];
-				const newSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Square")));
-				if (newSquare !== undefined) {
-					const move = this.game.move({
-						from: this.prevSquare.position,
-						to: newSquare.position,
-						promotion: "q"
-					});
-					if (move !== null) {
-						if (move.promotion === "q") {
-							const piece = this.pieceElements.get(this.draggedPiece);
-							piece.element.setAttribute("src", `assets/chess/${piece.color}q.png`);
-						}
-						this.prevSquare.removePiece();
-						if (newSquare.hasMine()) {
-							if (move.piece === "k") {
-								if (move.color === "b") {
-									this.status = "Game over, Black's king blew up!";
-								} else {
-									this.status = "Game over, White's king blew up!";
-								}
-								this.gameOver = true;
-							}
-							this.game.remove(newSquare.position);
-							newSquare.removePiece();
-						} else {
-							newSquare.addPiece(this.draggedPiece);
-						}
-
-						if (!this.gameOver) {
-							let moveColor = "White";
-							if (this.game.turn() === "b") {
-								moveColor = "Black";
-							}
-							if (this.game.in_checkmate()) {
-								this.status = `Game over, ${moveColor} is in checkmate.`
-								this.disableClicks();
-							} else if (this.game.insufficient_material()) {
-								this.status = "Game over, insufficient material.";
-								this.disableClicks();
-							} else if (this.game.in_stalemate()) {
-								this.status = "Game over, stalemate position.";
-								this.disableClicks();
-								// } else if (this.game.in_threefold_repetition()) {
-								// 	this.status = "Game over, threefold repetition rule.";
-								// 	this.disableClicks();
-							} else {
-								this.status = `${moveColor} to move.`;
-								if (this.game.in_check()) {
-									this.status += ` ${moveColor} is in check.`;
-								}
-								this.setMSBoard();
-							}
-						}
-						this.statusCB(this.status);
-					}
-				}
-
-				this.draggedPiece.style.top = null;
-				this.draggedPiece.style.left = null;
-				this.draggedPiece.style.position = null;
-				this.draggedPiece.style.zIndex = 0;
-				this.draggedPiece = null;
-				this.prevSquare = null;
-			}
-		};
-		this.element.onmousemove = (event) => {
-			if (this.dragging) {
-				event.preventDefault();
-				const prevMousePos = [this.lastMousePos[0] - event.clientX, this.lastMousePos[1] - event.clientY];
-				this.lastMousePos = [event.clientX, event.clientY];
-
-				this.draggedPiece.style.top = `${this.draggedPiece.offsetTop - prevMousePos[1]}px`;
-				this.draggedPiece.style.left = `${this.draggedPiece.offsetLeft - prevMousePos[0]}px`;
-			}
-		};
 	}
 
 	init() {
@@ -162,6 +67,103 @@ export default class Board {
 		this.squareSize = Object.values(this.squares)[0].size;
 
 		this.setBoard();
+	}
+
+	mouseDown(event) {
+		if (this.game.game_over() || this.gameOver) {
+			return;
+		}
+		if (event.target.classList.contains("Piece") && this.game.turn() === this.pieceElements.get(event.target).color) {
+			event.preventDefault();
+			this.dragging = true;
+			this.prevSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Square")));
+			this.lastMousePos = [event.clientX, event.clientY];
+			this.draggedPiece = event.target;
+			this.draggedPiece.style.position = "absolute";
+			this.draggedPiece.style.zIndex = 1;
+		}
+	}
+
+	mouseUp(event) {
+		if (this.dragging) {
+			event.preventDefault();
+			this.dragging = false;
+			this.lastMousePos = [];
+			const newSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Square")));
+			if (newSquare !== undefined) {
+				const move = this.game.move({
+					from: this.prevSquare.position,
+					to: newSquare.position,
+					promotion: "q"
+				});
+				if (move !== null) {
+					if (move.promotion === "q") {
+						const piece = this.pieceElements.get(this.draggedPiece);
+						piece.element.setAttribute("src", `assets/chess/${piece.color}q.png`);
+					}
+					this.prevSquare.removePiece();
+					if (newSquare.hasMine()) {
+						if (move.piece === "k") {
+							if (move.color === "b") {
+								this.status = "Game over, Black's king blew up!";
+							} else {
+								this.status = "Game over, White's king blew up!";
+							}
+							this.gameOver = true;
+						}
+						this.game.remove(newSquare.position);
+						newSquare.removePiece();
+					} else {
+						newSquare.addPiece(this.draggedPiece);
+					}
+
+					if (!this.gameOver) {
+						let moveColor = "White";
+						if (this.game.turn() === "b") {
+							moveColor = "Black";
+						}
+						if (this.game.in_checkmate()) {
+							this.status = `Game over, ${moveColor} is in checkmate.`
+							this.disableClicks();
+						} else if (this.game.insufficient_material()) {
+							this.status = "Game over, insufficient material.";
+							this.disableClicks();
+						} else if (this.game.in_stalemate()) {
+							this.status = "Game over, stalemate position.";
+							this.disableClicks();
+							// } else if (this.game.in_threefold_repetition()) {
+							// 	this.status = "Game over, threefold repetition rule.";
+							// 	this.disableClicks();
+						} else {
+							this.status = `${moveColor} to move.`;
+							if (this.game.in_check()) {
+								this.status += ` ${moveColor} is in check.`;
+							}
+							this.setMSBoard();
+						}
+					}
+					this.statusCB(this.status);
+				}
+			}
+
+			this.draggedPiece.style.top = null;
+			this.draggedPiece.style.left = null;
+			this.draggedPiece.style.position = null;
+			this.draggedPiece.style.zIndex = 0;
+			this.draggedPiece = null;
+			this.prevSquare = null;
+		}
+	}
+
+	mouseMove(event) {
+		if (this.dragging) {
+			event.preventDefault();
+			const prevMousePos = [this.lastMousePos[0] - event.clientX, this.lastMousePos[1] - event.clientY];
+			this.lastMousePos = [event.clientX, event.clientY];
+
+			this.draggedPiece.style.top = `${this.draggedPiece.offsetTop - prevMousePos[1]}px`;
+			this.draggedPiece.style.left = `${this.draggedPiece.offsetLeft - prevMousePos[0]}px`;
+		}
 	}
 
 	swapTurn() {
