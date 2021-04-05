@@ -17,12 +17,13 @@ export default class Square {
 		this.mineCount = null;
 
 		this.element = document.createElement("div");
+		this.element.style.position = "relative";
 		this.element.classList.add("Square");
 		this.element.classList.add(bg);
 		this.element.style.background = bg == "light" ? "#d7ccba" : "#bda193";
 
 		this.element.onmouseup = (event) => {
-			if (this.canClick && this.clickedOn && this.msStatus == "raised" && this.piece === null) {
+			if (this.canClick && this.clickedOn && this.msStatus == "raised" && this.element === document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Square"))) {
 				if (event.button == 0) {
 					if (this.flag !== null) {
 						this.element.removeChild(this.flag);
@@ -62,12 +63,18 @@ export default class Square {
 		}
 		this.piece = piece;
 		this.element.appendChild(piece);
+		if (this.mineCount !== null) {
+			this.displayChild(this.mineCount);
+		}
 	}
 
 	removePiece() {
 		if (this.piece !== null) {
 			this.element.removeChild(this.piece);
 			this.piece = null;
+		}
+		if (this.mineCount) {
+			this.displayChild(this.mineCount);
 		}
 	}
 
@@ -84,9 +91,7 @@ export default class Square {
 
 	addMine() {
 		this.mine = document.createElement("img");
-		this.mine.setAttribute("src", "assets/minesweeper/mine.png");
-		// this.mine.style.width = `${this.element.clientWidth}px`;
-		// this.mine.style.height = `${this.element.clientHeight}px`;
+		this.mine.setAttribute("src", "assets/minesweeper/mine.svg");
 	}
 
 	removeMine() {
@@ -104,6 +109,24 @@ export default class Square {
 
 	addAdjacentMine() {
 		this.adjacentMines++;
+	}
+
+	displayChild(child) {
+		if (this.piece !== null) {
+			child.style.position = "absolute";
+			child.style.top = `${this.element.clientWidth * .05}px`;
+			child.style.left = `${this.element.clientWidth * .05}px`;
+			child.style.width = `${this.element.clientWidth * .4}px`;
+			child.style.height = `${this.element.clientHeight * .4}px`;
+			child.style.zIndex = 1;
+		} else {
+			child.style.position = null;
+			child.style.top = null;
+			child.style.left = null;
+			child.style.width = `${this.element.clientWidth * .8}px`;
+			child.style.height = `${this.element.clientHeight * .8}px`;
+			child.style.zIndex = null;
+		}
 	}
 
 	clear() {
@@ -140,9 +163,12 @@ export default class Square {
 		this.element.classList.add("sunken");
 		this.msStatus = "sunken";
 		if (this.mine !== null) {
+			this.displayChild(this.mine);
 			this.element.appendChild(this.mine);
 		} else if (this.adjacentMines !== 0) {
-			this.mineCount = document.createTextNode(this.adjacentMines);
+			this.mineCount = document.createElement("img");
+			this.mineCount.setAttribute("src", `assets/minesweeper/${this.adjacentMines}.svg`);
+			this.displayChild(this.mineCount);
 			this.element.appendChild(this.mineCount);
 		} else {
 			this.noAdjacentMinesCB(this.position);

@@ -1,2 +1,3 @@
 make bomb blow up more visually apparent
 make threefold repetition not break all the time
+d4 bomb e4 doesnt work, but d4 bomb d3 does???

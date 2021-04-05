@@ -1,11 +1,10 @@
 export default class Network {
 	constructor({ ip, port }) {
-		console.log(1)
 		this.ws = new WebSocket(`ws://${ip}:${port}`);
 
 		this.ws.onopen = () => {
 			console.log("aaaaaaaaaaaaaaaaannnddddddddddd... OPEN!")
-		}
+		};
 		this.setOnMessage((data) => {
 			console.log(data)
 		});
@@ -15,7 +14,7 @@ export default class Network {
 	setOnMessage(fun) {
 		this.ws.onmessage = (event) => {
 			fun(JSON.parse(event.data));
-		}
+		};
 	}
 
 	send({ action, content }, numTries = 10) {

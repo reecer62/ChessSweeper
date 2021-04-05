@@ -15,8 +15,8 @@ export default class Piece {
 		} else {
 			this.element.classList.add("white");
 		}
-		this.element.style.width = size;
-		this.element.style.height = size;
+		this.element.style.width = `${size * .9}px`;
+		this.element.style.height = `${size * .9}px`;
 		this.element.style.zIndex = 0;
 	}
 

@@ -27,50 +27,9 @@ export default class Board {
 		this.init();
 	}
 
-	init() {
-		for (let i = 0; i < 64; i++) {
-			const rank = 8 - Math.floor(i / 8);
-			const fileNum = i % 8;
-			const file = files[fileNum];
-			const bg = rank % 2 === fileNum % 2 ? "light" : "dark";
-			const square = new Square({
-				rank,
-				file,
-				bg,
-				mineCB: () => {
-					let moveColor = "White";
-					let notMoveColor = "Black";
-					if (this.game.turn() === "b") {
-						moveColor = "Black";
-						notMoveColor = "White";
-					}
-					this.status = `${moveColor} blew up! ${notMoveColor} to move.`;
-					this.swapTurn();
-					this.statusCB(this.status);
-					this.setMSBoard();
-				},
-				noAdjacentMinesCB: (position) => {
-					let index = files.indexOf(position.charAt(0)) + (-1 * position.charAt(1) + 8) * 8;
-					this.findAdjacentSquares(index).forEach((s) => {
-						if (!s.hasMine() && !s.hasPiece() && s.getMSStatus() === "raised") {
-							s.sink();
-						}
-					});
-				}
-			});
-			this.element.appendChild(square.element);
-			square.fixSize();
-			this.squareElements.set(square.element, square);
-			this.squares[`${file}${rank}`] = square;
-		}
-
-		this.squareSize = Object.values(this.squares)[0].size;
-
-		this.setBoard();
-	}
-
 	mouseDown(event) {
 		if (this.game.game_over() || this.gameOver) {
+			console.log("GAME OVER")
 			return;
 		}
 		if (event.target.classList.contains("Piece") && this.game.turn() === this.pieceElements.get(event.target).color) {
@@ -91,6 +50,7 @@ export default class Board {
 			this.lastMousePos = [];
 			const newSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Square")));
 			if (newSquare !== undefined) {
+				// console.log(this.game.ascii());
 				const move = this.game.move({
 					from: this.prevSquare.position,
 					to: newSquare.position,
@@ -109,10 +69,12 @@ export default class Board {
 							} else {
 								this.status = "Game over, White's king blew up!";
 							}
+							this.disableClicks();
 							this.gameOver = true;
 						}
 						this.game.remove(newSquare.position);
 						newSquare.removePiece();
+						newSquare.sink();
 					} else {
 						newSquare.addPiece(this.draggedPiece);
 					}
@@ -123,7 +85,7 @@ export default class Board {
 							moveColor = "Black";
 						}
 						if (this.game.in_checkmate()) {
-							this.status = `Game over, ${moveColor} is in checkmate.`
+							this.status = `Game over, ${moveColor} is in checkmate.`;
 							this.disableClicks();
 						} else if (this.game.insufficient_material()) {
 							this.status = "Game over, insufficient material.";
@@ -139,7 +101,6 @@ export default class Board {
 							if (this.game.in_check()) {
 								this.status += ` ${moveColor} is in check.`;
 							}
-							this.setMSBoard();
 						}
 					}
 					this.statusCB(this.status);
@@ -153,6 +114,47 @@ export default class Board {
 			this.draggedPiece = null;
 			this.prevSquare = null;
 		}
+	}
+
+	init() {
+		for (let i = 0; i < 64; i++) {
+			const rank = 8 - Math.floor(i / 8);
+			const fileNum = i % 8;
+			const file = files[fileNum];
+			const bg = rank % 2 === fileNum % 2 ? "light" : "dark";
+			const square = new Square({
+				rank,
+				file,
+				bg,
+				mineCB: () => {
+					let moveColor = "White";
+					let notMoveColor = "Black";
+					if (this.game.turn() === "b") {
+						moveColor = "Black";
+						notMoveColor = "White";
+					}
+					this.status = `${moveColor} blew up! ${notMoveColor} to move.`;
+					this.swapTurn();
+					this.statusCB(this.status);
+				},
+				noAdjacentMinesCB: (position) => {
+					let index = files.indexOf(position.charAt(0)) + (-1 * position.charAt(1) + 8) * 8;
+					this.findAdjacentSquares(index).forEach((s) => {
+						if (!s.hasMine() && s.getMSStatus() === "raised") {
+							s.sink();
+						}
+					});
+				}
+			});
+			this.element.appendChild(square.element);
+			square.fixSize();
+			this.squareElements.set(square.element, square);
+			this.squares[`${file}${rank}`] = square;
+		}
+
+		this.squareSize = Object.values(this.squares)[0].size;
+
+		this.setBoard();
 	}
 
 	mouseMove(event) {
@@ -188,11 +190,12 @@ export default class Board {
 	}
 
 	setBoard() {
-		this.setMSBoard();
+		this.resetMS();
+		this.setMines();
 		this.game.board().reverse().forEach((rank, ri) => {
 			rank.forEach((square, fi) => {
 				if (square !== null) {
-					const piece = new Piece({ color: square.color, type: square.type, size: `${this.squareSize}px` });
+					const piece = new Piece({ color: square.color, type: square.type, size: this.squareSize });
 					this.squares[`${files[fi]}${ri + 1}`].addPiece(piece.element);
 					this.pieceElements.set(piece.element, piece);
 				}
@@ -202,18 +205,23 @@ export default class Board {
 		this.statusCB(this.status);
 	}
 
-	setMSBoard() {
+	setMines() {
+		let mineCount = 12;
 		let mineLocs = [];
-		while (mineLocs.length < 8) {
-			let loc = Math.floor(Math.random() * Object.keys(this.squares).length);
+		while (mineLocs.length < mineCount / 2) {
+			let loc = Math.floor(Math.random() * Object.keys(this.squares).length / 2);
 			if (mineLocs.indexOf(loc) === -1) {
 				mineLocs.push(loc);
 			}
 		}
+		while (mineLocs.length < mineCount) {
+			let loc = Math.floor(Math.random() * (Object.keys(this.squares).length - Object.keys(this.squares).length / 2) + Object.keys(this.squares).length / 2);
+			if (mineLocs.indexOf(loc) === -1) {
+				mineLocs.push(loc);
+			}
+		}
+		console.log(mineLocs)
 
-		Object.values(this.squares).forEach((s) => {
-			s.resetMS();
-		});
 		Object.values(this.squares).forEach((s, index) => {
 			if (mineLocs.indexOf(index) !== -1) {
 				s.addMine();
@@ -221,6 +229,12 @@ export default class Board {
 					ss.addAdjacentMine();
 				});
 			}
+		});
+	}
+
+	resetMS() {
+		Object.values(this.squares).forEach((s) => {
+			s.resetMS();
 		});
 	}
 
