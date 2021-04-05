@@ -1,10 +1,11 @@
 export default class Square {
 	element;
 
-	constructor({ rank, file, bg, mineCB }) {
+	constructor({ rank, file, bg, mineCB, noAdjacentMinesCB }) {
 		this.rank = rank;
 		this.file = file;
 		this.mineCB = mineCB;
+		this.noAdjacentMinesCB = noAdjacentMinesCB;
 
 		this.piece = null;
 		this.msStatus = "";
@@ -70,6 +71,10 @@ export default class Square {
 		}
 	}
 
+	hasPiece() {
+		return this.piece !== null;
+	}
+
 	removeFlag() {
 		if (this.flag !== null) {
 			this.element.removeChild(this.flag);
@@ -80,8 +85,8 @@ export default class Square {
 	addMine() {
 		this.mine = document.createElement("img");
 		this.mine.setAttribute("src", "assets/minesweeper/mine.png");
-		this.mine.style.width = `${this.element.clientWidth}px`;
-		this.mine.style.height = `${this.element.clientHeight}px`;
+		// this.mine.style.width = `${this.element.clientWidth}px`;
+		// this.mine.style.height = `${this.element.clientHeight}px`;
 	}
 
 	removeMine() {
@@ -94,7 +99,7 @@ export default class Square {
 	}
 
 	hasMine() {
-		return (this.mine !== null);
+		return this.mine !== null;
 	}
 
 	addAdjacentMine() {
@@ -139,18 +144,25 @@ export default class Square {
 		} else if (this.adjacentMines !== 0) {
 			this.mineCount = document.createTextNode(this.adjacentMines);
 			this.element.appendChild(this.mineCount);
+		} else {
+			this.noAdjacentMinesCB(this.position);
 		}
 	}
-	
+
 	resetMS() {
 		this.removeMine();
 		this.removeFlag();
 		this.raise();
+
 		this.adjacentMines = 0;
 	}
 
 	disableClicks() {
 		this.canClick = false;
+	}
+
+	getMSStatus() {
+		return this.msStatus;
 	}
 
 	get size() {

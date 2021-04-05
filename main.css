@@ -146,3 +146,9 @@ body {
 	box-shadow: var(--sunkenSize) var(--sunkenSize) 0.5px #9a8073 inset,
 				calc(var(--sunkenSize) * -1) calc(var(--sunkenSize) * -1) 0.5px #d8c1b1 inset;
 }
+
+.Square {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}

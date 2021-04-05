@@ -1,5 +1,3 @@
 make bomb blow up more visually apparent
 make pieces dragged off the board work???
-make numbers next to bombs
-make empty spaces chain when clicked
 make threefold repetition not break all the time

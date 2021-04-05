@@ -87,9 +87,9 @@ export default class Board {
 							} else if (this.game.in_stalemate()) {
 								this.status = "Game over, stalemate position.";
 								this.disableClicks();
-							// } else if (this.game.in_threefold_repetition()) {
-							// 	this.status = "Game over, threefold repetition rule.";
-							// 	this.disableClicks();
+								// } else if (this.game.in_threefold_repetition()) {
+								// 	this.status = "Game over, threefold repetition rule.";
+								// 	this.disableClicks();
 							} else {
 								this.status = `${moveColor} to move.`;
 								if (this.game.in_check()) {
@@ -143,6 +143,14 @@ export default class Board {
 					this.swapTurn();
 					this.statusCB(this.status);
 					this.setMSBoard();
+				},
+				noAdjacentMinesCB: (position) => {
+					let index = files.indexOf(position.charAt(0)) + (-1 * position.charAt(1) + 8) * 8;
+					this.findAdjacentSquares(index).forEach((s) => {
+						if (!s.hasMine() && !s.hasPiece() && s.getMSStatus() === "raised") {
+							s.sink();
+						}
+					});
 				}
 			});
 			this.element.appendChild(square.element);
@@ -194,22 +202,23 @@ export default class Board {
 
 	setMSBoard() {
 		let mineLocs = [];
-		while (mineLocs.length < 10) {
+		while (mineLocs.length < 8) {
 			let loc = Math.floor(Math.random() * Object.keys(this.squares).length);
 			if (mineLocs.indexOf(loc) === -1) {
 				mineLocs.push(loc);
 			}
 		}
-		if (!mineLocs.includes(0)) {
-			mineLocs[0] = 0;
-		}
 
-		Object.values(this.squares).forEach((s, index) => {
+		Object.values(this.squares).forEach((s) => {
 			s.resetMS();
+		});
+		Object.values(this.squares).forEach((s, index) => {
 			if (mineLocs.indexOf(index) !== -1) {
 				s.addMine();
+				this.findAdjacentSquares(index).forEach((ss) => {
+					ss.addAdjacentMine();
+				});
 			}
-			//calculate surrounding square indices
 		});
 	}
 
@@ -217,5 +226,25 @@ export default class Board {
 		Object.values(this.squares).forEach((s) => {
 			s.disableClicks();
 		});
+	}
+
+	findAdjacentSquares(index) {
+		let adj = [];
+		[-9, -7, 7, 9].forEach((i) => {
+			if (index + i >= 0 && index + i < 64 && Math.abs(Math.floor((index + i) / 8) - Math.floor(index / 8)) === 1 && Math.abs((index + i) % 8 - index % 8) === 1) { //row and column distance is 1
+				adj.push(this.squares[`${files[(index + i) % 8]}${8 - Math.floor((index + i) / 8)}`]);
+			}
+		});
+		[-8, 8].forEach((i) => {
+			if (index + i >= 0 && index + i < 64 && Math.abs(Math.floor((index + i) / 8) - Math.floor(index / 8)) === 1 && Math.abs((index + i) % 8 - index % 8) === 0) { //row distance is 1, column distance is 0
+				adj.push(this.squares[`${files[(index + i) % 8]}${8 - Math.floor((index + i) / 8)}`]);
+			}
+		});
+		[-1, 1].forEach((i) => {
+			if (index + i >= 0 && index + i < 64 && Math.abs(Math.floor((index + i) / 8) - Math.floor(index / 8)) === 0 && Math.abs((index + i) % 8 - index % 8) === 1) { //row distance is 0, column distance is 1
+				adj.push(this.squares[`${files[(index + i) % 8]}${8 - Math.floor((index + i) / 8)}`]);
+			}
+		});
+		return adj;
 	}
 }
