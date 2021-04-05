@@ -220,7 +220,6 @@ export default class Board {
 				mineLocs.push(loc);
 			}
 		}
-		console.log(mineLocs)
 
 		Object.values(this.squares).forEach((s, index) => {
 			if (mineLocs.indexOf(index) !== -1) {

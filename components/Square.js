@@ -39,9 +39,8 @@ export default class Square {
 						this.flag = null;
 					} else {
 						this.flag = document.createElement("img");
-						this.flag.setAttribute("src", "assets/minesweeper/flag.png");
-						this.flag.style.width = `${this.element.clientWidth}px`;
-						this.flag.style.height = `${this.element.clientHeight}px`;
+						this.flag.setAttribute("src", "assets/minesweeper/flag.svg");
+						this.displayChild(this.flag);
 						this.element.appendChild(this.flag);
 					}
 				}
@@ -58,11 +57,11 @@ export default class Square {
 		if (this.piece !== null) {
 			this.element.removeChild(this.piece);
 		}
-		if (this.flag !== null) {
-			this.element.removeChild(this.flag);
-		}
 		this.piece = piece;
 		this.element.appendChild(piece);
+		if (this.flag !== null) {
+			this.displayChild(this.flag);
+		}
 		if (this.mineCount !== null) {
 			this.displayChild(this.mineCount);
 		}
@@ -73,8 +72,14 @@ export default class Square {
 			this.element.removeChild(this.piece);
 			this.piece = null;
 		}
-		if (this.mineCount) {
+		if (this.flag !== null) {
+			this.displayChild(this.flag);
+		}
+		if (this.mineCount !== null) {
 			this.displayChild(this.mineCount);
+		}
+		if (this.mine !== null) {
+			this.displayChild(this.mine);
 		}
 	}
 

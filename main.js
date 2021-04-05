@@ -1,7 +1,7 @@
 import Network from "./components/Network.js";
 import Board from "./components/Board.js";
 
-const network = new Network({ ip: "173.95.165.30", port: "25568" });
+const network = new Network({ ip: "localhost", port: "25568" }); //173.95.165.30
 const board = new Board({ selector: "#board", size: "400px", network, statusCB: (text) => document.getElementById("status").innerHTML = text });
 
 document.onmousedown = (event) => {
