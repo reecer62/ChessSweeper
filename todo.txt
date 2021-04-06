@@ -1,3 +1,4 @@
+add time controls
 make mines more apparent when piece lands on it
 d4 mine e4 doesnt work, but d4 mine exd3 does???
 sometimes it bugs and you have to drag twice to move pieces
