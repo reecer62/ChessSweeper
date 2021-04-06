@@ -1,3 +1,5 @@
+make highlight color work for edges of raised/sunken squares (css calc???)
+make highlight go away when new move is done
 add time controls
 make mines more apparent when piece lands on it
 d4 mine e4 doesnt work, but d4 mine exd3 does???

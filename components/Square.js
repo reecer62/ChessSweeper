@@ -4,6 +4,7 @@ export default class Square {
 	constructor({ rank, file, bg, mineCB, noAdjacentMinesCB }) {
 		this.rank = rank;
 		this.file = file;
+		this.bg = bg;
 		this.mineCB = mineCB;
 		this.noAdjacentMinesCB = noAdjacentMinesCB;
 
@@ -19,8 +20,7 @@ export default class Square {
 		this.element = document.createElement("div");
 		this.element.style.position = "relative";
 		this.element.classList.add("Square");
-		this.element.classList.add(bg);
-		this.element.style.background = bg == "light" ? "#d7ccba" : "#bda193";
+		this.element.classList.add(this.bg);
 
 		this.element.onmouseup = (event) => {
 			if (this.canClick && this.clickedOn && this.msStatus == "raised" && this.element === document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Square"))) {
@@ -120,16 +120,16 @@ export default class Square {
 		if (this.piece !== null) {
 			child.style.position = "absolute";
 			child.style.top = `${this.element.clientWidth * .05}px`;
-			child.style.left = `${this.element.clientWidth * .05}px`;
-			child.style.width = `${this.element.clientWidth * .4}px`;
-			child.style.height = `${this.element.clientHeight * .4}px`;
+			child.style.right = `${this.element.clientWidth * .05}px`;
+			child.style.width = `${this.element.clientWidth * .3}px`;
+			child.style.height = `${this.element.clientHeight * .3}px`;
 			child.style.zIndex = 1;
 		} else {
 			child.style.position = null;
 			child.style.top = null;
-			child.style.left = null;
-			child.style.width = `${this.element.clientWidth * .8}px`;
-			child.style.height = `${this.element.clientHeight * .8}px`;
+			child.style.right = null;
+			child.style.width = `${this.element.clientWidth * .5}px`;
+			child.style.height = `${this.element.clientHeight * .5}px`;
 			child.style.zIndex = null;
 		}
 	}
@@ -151,6 +151,25 @@ export default class Square {
 		this.element.style.maxWidth = `${this.element.clientWidth}px`;
 		this.element.style.setProperty("--raisedSize", `${this.element.clientHeight / 10}px`);
 		this.element.style.setProperty("--sunkenSize", `${this.element.clientHeight / 20}px`);
+
+		if (this.rank === 1) {
+			let fileLabel = document.createElement("div");
+			fileLabel.innerHTML = this.file;
+			fileLabel.style.position = "absolute";
+			fileLabel.style.bottom = `${this.element.clientWidth * .025}px`;
+			fileLabel.style.right = `${this.element.clientWidth * .025}px`;
+			fileLabel.style.cursor = "default";
+			this.element.appendChild(fileLabel);
+		}
+		if (this.file === "a") {
+			let rankLabel = document.createElement("div");
+			rankLabel.innerHTML = this.rank;
+			rankLabel.style.position = "absolute";
+			rankLabel.style.top = `${this.element.clientWidth * .025}px`;
+			rankLabel.style.left = `${this.element.clientWidth * .025}px`;
+			rankLabel.style.cursor = "default";
+			this.element.appendChild(rankLabel);
+		}
 	}
 
 	raise() {

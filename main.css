@@ -15,140 +15,52 @@ body {
 	display: grid;
 	grid-template-columns: repeat(8, 1fr);
 	grid-template-rows: repeat(8, 1fr);
-	grid-area: board;
-}
-
-#boardContainer .b1 {
-	grid-area: b1;
-}
-
-#boardContainer .b2 {
-	grid-area: b2;
-}
-
-#boardContainer .b3 {
-	grid-area: b3;
-}
-
-#boardContainer .b4 {
-	grid-area: b4;
-}
-
-#boardContainer .b5 {
-	grid-area: b5;
-}
-
-#boardContainer .b6 {
-	grid-area: b6;
-}
-
-#boardContainer .b7 {
-	grid-area: b7;
-}
-
-#boardContainer .b8 {
-	grid-area: b8;
-}
-
-#boardContainer .ba {
-	grid-area: ba;
-}
-
-#boardContainer .bb {
-	grid-area: bb;
-}
-
-#boardContainer .bc {
-	grid-area: bc;
-}
-
-#boardContainer .bd {
-	grid-area: bd;
-}
-
-#boardContainer .be {
-	grid-area: be;
-}
-
-#boardContainer .bf {
-	grid-area: bf;
-}
-
-#boardContainer .bg {
-	grid-area: bg;
-}
-
-#boardContainer .bh {
-	grid-area: bh;
-}
-
-#boardContainer [class^="b"] {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	padding: 5px;
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-
-}
-
-#boardContainer {
-	display: grid;
-	grid-template-rows: 10px repeat(8, 1fr) 10px auto;
-	grid-template-columns: auto 10px repeat(8, 1fr) 10px;
-	grid-template-areas:
-	". board board board board board board board board board board"
-	"b8 board board board board board board board board board board"
-	"b7 board board board board board board board board board board"
-	"b6 board board board board board board board board board board"
-	"b5 board board board board board board board board board board"
-	"b4 board board board board board board board board board board"
-	"b3 board board board board board board board board board board"
-	"b2 board board board board board board board board board board"
-	"b1 board board board board board board board board board board"
-	". board board board board board board board board board board"
-	". . ba bb bc bd be bf bg bh .";
-}
-
-#boardContainer.flipped {
-	grid-template-areas:
-	". board board board board board board board board board board"
-	"b1 board board board board board board board board board board"
-	"b2 board board board board board board board board board board"
-	"b3 board board board board board board board board board board"
-	"b4 board board board board board board board board board board"
-	"b5 board board board board board board board board board board"
-	"b6 board board board board board board board board board board"
-	"b7 board board board board board board board board board board"
-	"b8 board board board board board board board board board board"
-	". board board board board board board board board board board"
-	". . bh bg bf be bd bc bb ba .";
-}
-
-.light.raised {
-    box-shadow: var(--raisedSize) var(--raisedSize) 0.5px #f4edda inset,
-				calc(var(--raisedSize) * -1) calc(var(--raisedSize) * -1) 0.5px #b3ac99 inset;
-}
-
-.dark.raised {
-	box-shadow: var(--raisedSize) var(--raisedSize) 0.5px #d8c1b1 inset,
-				calc(var(--raisedSize) * -1) calc(var(--raisedSize) * -1) 0.5px #9a8073 inset;
-}
-
-.light.sunken {
-	box-shadow: var(--sunkenSize) var(--sunkenSize) 0.5px #b3ac99 inset,
-				calc(var(--sunkenSize) * -1) calc(var(--sunkenSize) * -1) 0.5px #f4edda inset;
-}
-
-.dark.sunken {
-	box-shadow: var(--sunkenSize) var(--sunkenSize) 0.5px #9a8073 inset,
-				calc(var(--sunkenSize) * -1) calc(var(--sunkenSize) * -1) 0.5px #d8c1b1 inset;
 }
 
 .Square {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+}
+
+.Piece {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.light {
+	background: rgb(239, 217, 181);
+}
+
+.dark {
+	background: rgb(181, 136, 99);
+}
+
+.light.raised {
+    box-shadow: var(--raisedSize) var(--raisedSize) rgb(255, 243, 224) inset,
+				calc(var(--raisedSize) * -1) calc(var(--raisedSize) * -1) rgb(185, 160, 119) inset;
+}
+
+.dark.raised {
+	box-shadow: var(--raisedSize) var(--raisedSize) rgb(240, 194, 156) inset,
+				calc(var(--raisedSize) * -1) calc(var(--raisedSize) * -1) rgb(143, 99, 64) inset;
+}
+
+.light.sunken {
+	box-shadow: var(--sunkenSize) var(--sunkenSize) rgb(185, 160, 119) inset,
+				calc(var(--sunkenSize) * -1) calc(var(--sunkenSize) * -1) rgb(255, 243, 224) inset;
+}
+
+.dark.sunken {
+	box-shadow: var(--sunkenSize) var(--sunkenSize) rgb(143, 99, 64) inset,
+				calc(var(--sunkenSize) * -1) calc(var(--sunkenSize) * -1) rgb(240, 194, 156) inset;
+}
+
+.light.highlighted {
+	background: rgb(247, 236, 115);
+}
+
+.dark.highlighted {
+	background: rgb(217, 196, 76);
 }

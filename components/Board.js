@@ -32,12 +32,13 @@ export default class Board {
 			console.log("GAME OVER")
 			return;
 		}
-		if (event.target.classList.contains("Piece") && this.game.turn() === this.pieceElements.get(event.target).color) {
+		let piece = document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Piece"))
+		if (piece && this.game.turn() === this.pieceElements.get(piece).color) {
 			event.preventDefault();
 			this.dragging = true;
 			this.prevSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Square")));
 			this.lastMousePos = [event.clientX, event.clientY];
-			this.draggedPiece = event.target;
+			this.draggedPiece = piece;
 			this.draggedPiece.style.position = "absolute";
 			this.draggedPiece.style.zIndex = 1;
 		}
@@ -57,6 +58,8 @@ export default class Board {
 					promotion: "q"
 				});
 				if (move !== null) {
+					this.prevSquare.element.classList.add("highlighted");
+					newSquare.element.classList.add("highlighted");
 					if (move.promotion === "q") {
 						const piece = this.pieceElements.get(this.draggedPiece);
 						piece.element.setAttribute("src", `assets/chess/${piece.color}q.png`);
@@ -118,6 +121,17 @@ export default class Board {
 			this.prevSquare = null;
 		}
 	}
+	
+	mouseMove(event) {
+		if (this.dragging) {
+			event.preventDefault();
+			const prevMousePos = [this.lastMousePos[0] - event.clientX, this.lastMousePos[1] - event.clientY];
+			this.lastMousePos = [event.clientX, event.clientY];
+
+			this.draggedPiece.style.top = `${this.draggedPiece.offsetTop - prevMousePos[1]}px`;
+			this.draggedPiece.style.left = `${this.draggedPiece.offsetLeft - prevMousePos[0]}px`;
+		}
+	}
 
 	init() {
 		for (let i = 0; i < 64; i++) {
@@ -164,17 +178,6 @@ export default class Board {
 		this.squareSize = Object.values(this.squares)[0].size;
 
 		this.setBoard();
-	}
-
-	mouseMove(event) {
-		if (this.dragging) {
-			event.preventDefault();
-			const prevMousePos = [this.lastMousePos[0] - event.clientX, this.lastMousePos[1] - event.clientY];
-			this.lastMousePos = [event.clientX, event.clientY];
-
-			this.draggedPiece.style.top = `${this.draggedPiece.offsetTop - prevMousePos[1]}px`;
-			this.draggedPiece.style.left = `${this.draggedPiece.offsetLeft - prevMousePos[0]}px`;
-		}
 	}
 
 	swapTurn() {
