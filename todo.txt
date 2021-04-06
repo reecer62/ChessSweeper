@@ -1,2 +1,6 @@
+make minesweeper reset on piece loss
+make mines more apparent when piece lands on it
+d4 mine e4 doesnt work, but d4 mine exd3 does???
+sometimes it bugs and you have to drag twice to move pieces
 make threefold repetition not break all the time
-d4 bomb e4 doesnt work, but d4 bomb exd3 does???
+make spectators able to see minesweeper state for each player (white/black dot/flag in top right corner)

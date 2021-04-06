@@ -74,8 +74,11 @@ export default class Board {
 						}
 						this.game.remove(newSquare.position);
 						newSquare.removePiece();
-						newSquare.sink();
+						this.resetMS();
 					} else {
+						if ("captured" in move) {
+							this.resetMS();
+						}
 						newSquare.addPiece(this.draggedPiece);
 					}
 
@@ -133,8 +136,14 @@ export default class Board {
 						moveColor = "Black";
 						notMoveColor = "White";
 					}
-					this.status = `${moveColor} blew up! ${notMoveColor} to move.`;
-					this.swapTurn();
+					if (this.game.in_check()) {
+						this.status = `Game over, ${moveColor} blew up while in check!`;
+						this.disableClicks();
+						this.gameOver = true;
+					} else {
+						this.status = `${moveColor} blew up! ${notMoveColor} to move.`;
+						this.swapTurn();
+					}
 					this.statusCB(this.status);
 				},
 				noAdjacentMinesCB: (position) => {
@@ -191,7 +200,6 @@ export default class Board {
 
 	setBoard() {
 		this.resetMS();
-		this.setMines();
 		this.game.board().reverse().forEach((rank, ri) => {
 			rank.forEach((square, fi) => {
 				if (square !== null) {
@@ -205,7 +213,11 @@ export default class Board {
 		this.statusCB(this.status);
 	}
 
-	setMines() {
+	resetMS() {
+		Object.values(this.squares).forEach((s) => {
+			s.resetMS();
+		});
+
 		let mineCount = 12;
 		let mineLocs = [];
 		while (mineLocs.length < mineCount / 2) {
@@ -228,12 +240,6 @@ export default class Board {
 					ss.addAdjacentMine();
 				});
 			}
-		});
-	}
-
-	resetMS() {
-		Object.values(this.squares).forEach((s) => {
-			s.resetMS();
 		});
 	}
 
