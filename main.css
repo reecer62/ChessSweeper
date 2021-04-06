@@ -65,3 +65,23 @@ body {
 .dark.highlighted {
 	background: rgb(217, 196, 76);
 }
+
+.light.raised.highlighted {
+    box-shadow: var(--raisedSize) var(--raisedSize) rgb(255, 250, 194) inset,
+				calc(var(--raisedSize) * -1) calc(var(--raisedSize) * -1) rgb(206, 195, 78) inset;
+}
+
+.dark.raised.highlighted {
+	box-shadow: var(--raisedSize) var(--raisedSize) rgb(245, 224, 109) inset,
+				calc(var(--raisedSize) * -1) calc(var(--raisedSize) * -1) rgb(167, 149, 48) inset;
+}
+
+.light.sunken.highlighted {
+	box-shadow: var(--sunkenSize) var(--sunkenSize) rgb(206, 195, 78) inset,
+				calc(var(--sunkenSize) * -1) calc(var(--sunkenSize) * -1) rgb(255, 250, 194) inset;
+}
+
+.dark.sunken.highlighted {
+	box-shadow: var(--sunkenSize) var(--sunkenSize) rgb(167, 149, 48) inset,
+				calc(var(--sunkenSize) * -1) calc(var(--sunkenSize) * -1) rgb(245, 224, 109) inset;
+}

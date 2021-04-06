@@ -16,6 +16,8 @@ export default class Square {
 		this.canClick = true;
 		this.adjacentMines = 0;
 		this.mineCount = null;
+		this.rankLabel = null;
+		this.fileLabel = null;
 
 		this.element = document.createElement("div");
 		this.element.style.position = "relative";
@@ -87,6 +89,10 @@ export default class Square {
 		return this.piece !== null;
 	}
 
+	getPiece() {
+		return this.piece;
+	}
+
 	removeFlag() {
 		if (this.flag !== null) {
 			this.element.removeChild(this.flag);
@@ -144,6 +150,8 @@ export default class Square {
 		this.canClick = true;
 		this.adjacentMines = 0;
 		this.mineCount = null;
+		this.rankLabel = null;
+		this.fileLabel = null;
 	}
 
 	fixSize() {
@@ -151,24 +159,34 @@ export default class Square {
 		this.element.style.maxWidth = `${this.element.clientWidth}px`;
 		this.element.style.setProperty("--raisedSize", `${this.element.clientHeight / 10}px`);
 		this.element.style.setProperty("--sunkenSize", `${this.element.clientHeight / 20}px`);
+	}
 
-		if (this.rank === 1) {
-			let fileLabel = document.createElement("div");
-			fileLabel.innerHTML = this.file;
-			fileLabel.style.position = "absolute";
-			fileLabel.style.bottom = `${this.element.clientWidth * .025}px`;
-			fileLabel.style.right = `${this.element.clientWidth * .025}px`;
-			fileLabel.style.cursor = "default";
-			this.element.appendChild(fileLabel);
+	setLabels(labelRank, labelFile) {
+		if (labelRank) {
+			this.rankLabel = document.createElement("div");
+			this.rankLabel.innerHTML = this.rank;
+			this.rankLabel.style.position = "absolute";
+			this.rankLabel.style.top = `${this.element.clientWidth * .025}px`;
+			this.rankLabel.style.left = `${this.element.clientWidth * .025}px`;
+			this.rankLabel.style.cursor = "default";
+			this.element.appendChild(this.rankLabel);
+		} else {
+			if (this.rankLabel !== null) {
+				this.element.removeChild(this.rankLabel);
+			}
 		}
-		if (this.file === "a") {
-			let rankLabel = document.createElement("div");
-			rankLabel.innerHTML = this.rank;
-			rankLabel.style.position = "absolute";
-			rankLabel.style.top = `${this.element.clientWidth * .025}px`;
-			rankLabel.style.left = `${this.element.clientWidth * .025}px`;
-			rankLabel.style.cursor = "default";
-			this.element.appendChild(rankLabel);
+		if (labelFile) {
+			this.fileLabel = document.createElement("div");
+			this.fileLabel.innerHTML = this.file;
+			this.fileLabel.style.position = "absolute";
+			this.fileLabel.style.bottom = `${this.element.clientWidth * .025}px`;
+			this.fileLabel.style.right = `${this.element.clientWidth * .025}px`;
+			this.fileLabel.style.cursor = "default";
+			this.element.appendChild(this.fileLabel);
+		} else {
+			if (this.fileLabel !== null) {
+				this.element.removeChild(this.fileLabel);
+			}
 		}
 	}
 

@@ -220,11 +220,9 @@ var Chess = function (fen) {
 		var position = tokens[0]
 		var square = 0
 
-		//EDIT
-		// if (!validate_fen(fen).valid) {
-		// 	return false
-		// }
-		//END EDIT
+		if (!validate_fen(fen).valid) {
+			return false
+		}
 
 		clear(keep_headers)
 
@@ -910,37 +908,31 @@ var Chess = function (fen) {
 			}
 		}
 
-		//EDIT
-		if (board[move.to] !== null) {
-			//END EDIT
-			/* if pawn promotion, replace with new piece */
-			if (move.flags & BITS.PROMOTION) {
-				board[move.to] = { type: move.promotion, color: us }
-			}
-
-			/* if we moved the king */
-			if (board[move.to].type === KING) {
-				kings[board[move.to].color] = move.to
-
-				/* if we castled, move the rook next to the king */
-				if (move.flags & BITS.KSIDE_CASTLE) {
-					var castling_to = move.to - 1
-					var castling_from = move.to + 1
-					board[castling_to] = board[castling_from]
-					board[castling_from] = null
-				} else if (move.flags & BITS.QSIDE_CASTLE) {
-					var castling_to = move.to + 1
-					var castling_from = move.to - 2
-					board[castling_to] = board[castling_from]
-					board[castling_from] = null
-				}
-
-				/* turn off castling */
-				castling[us] = ''
-			}
-			//EDIT
+		/* if pawn promotion, replace with new piece */
+		if (move.flags & BITS.PROMOTION) {
+			board[move.to] = { type: move.promotion, color: us }
 		}
-		//END EDIT
+
+		/* if we moved the king */
+		if (board[move.to].type === KING) {
+			kings[board[move.to].color] = move.to
+
+			/* if we castled, move the rook next to the king */
+			if (move.flags & BITS.KSIDE_CASTLE) {
+				var castling_to = move.to - 1
+				var castling_from = move.to + 1
+				board[castling_to] = board[castling_from]
+				board[castling_from] = null
+			} else if (move.flags & BITS.QSIDE_CASTLE) {
+				var castling_to = move.to + 1
+				var castling_from = move.to - 2
+				board[castling_to] = board[castling_from]
+				board[castling_from] = null
+			}
+
+			/* turn off castling */
+			castling[us] = ''
+		}
 
 		/* turn off castling if we move a rook */
 		if (castling[us]) {
@@ -1001,13 +993,6 @@ var Chess = function (fen) {
 		}
 
 		var move = old.move
-
-		//EDIT
-		if (board[move.to] === null) {
-			return move
-		}
-		//END EDIT
-
 		kings = old.kings
 		turn = old.turn
 		castling = old.castling

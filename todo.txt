@@ -1,8 +1,8 @@
-make highlight color work for edges of raised/sunken squares (css calc???)
-make highlight go away when new move is done
+make rank/file labels more visible
+allow pieces to be dragged back onto their square without sinking square below it
+make possible moves highlight
 add time controls
 make mines more apparent when piece lands on it
-d4 mine e4 doesnt work, but d4 mine exd3 does???
 sometimes it bugs and you have to drag twice to move pieces
 make threefold repetition not break all the time
-make spectators able to see minesweeper state for each player (white/black dot/flag in top right corner)
+make spectators able to see minesweeper state for each player (white/black dot/flag in bottom left corner)

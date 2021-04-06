@@ -17,6 +17,9 @@ export default class Board {
 		this.lastMousePos = [];
 		this.draggedPiece;
 		this.prevSquare;
+		this.perspective = "w";
+		this.prevMove = {};
+
 		this.gameOver = false;
 
 		this.element = document.querySelector(selector);
@@ -28,8 +31,7 @@ export default class Board {
 	}
 
 	mouseDown(event) {
-		if (this.game.game_over() || this.gameOver) {
-			console.log("GAME OVER")
+		if (this.gameOver) {
 			return;
 		}
 		let piece = document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Piece"))
@@ -49,10 +51,9 @@ export default class Board {
 			event.preventDefault();
 			this.dragging = false;
 			this.lastMousePos = [];
-			const newSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Square")));
-			if (newSquare !== undefined) {
-				// console.log(this.game.ascii());
-				const move = this.game.move({
+			let newSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Square")));
+			if (newSquare !== undefined && this.prevSquare !== newSquare) {
+				let move = this.game.move({
 					from: this.prevSquare.position,
 					to: newSquare.position,
 					promotion: "q"
@@ -60,9 +61,35 @@ export default class Board {
 				if (move !== null) {
 					this.prevSquare.element.classList.add("highlighted");
 					newSquare.element.classList.add("highlighted");
-					if (move.promotion === "q") {
-						const piece = this.pieceElements.get(this.draggedPiece);
+					if (Object.keys(this.prevMove).length !== 0) {
+						this.squares[this.prevMove.from].element.classList.remove("highlighted");
+						this.squares[this.prevMove.to].element.classList.remove("highlighted");
+					}
+					this.prevMove = move;
+					if (move.promotion === "q") { //promotion
+						let piece = this.pieceElements.get(this.draggedPiece);
 						piece.element.setAttribute("src", `assets/chess/${piece.color}q.png`);
+					}
+					if (move.flags.includes("k")) { //kingside castle
+						let rank = move.color === "b" ? "8" : "1";
+						let rook = this.squares[`h${rank}`].getPiece();
+						this.squares[`h${rank}`].removePiece();
+						if (!this.squares[`f${rank}`].hasMine()) {
+							this.squares[`f${rank}`].addPiece(rook);
+						}
+					}
+					if (move.flags.includes("q")) { //queenside castle
+						let rank = move.color === "b" ? "8" : "1";
+						let rook = this.squares[`a${rank}`].getPiece();
+						this.squares[`a${rank}`].removePiece();
+						if (!this.squares[`d${rank}`].hasMine()) {
+							this.squares[`d${rank}`].addPiece(rook);
+						}
+					}
+					if (move.flags.includes("e")) { //en passant
+						let rank = parseInt(move.to.charAt(1)) + (move.color === "b" ? 1 : -1);
+						let file = move.to.charAt(0);
+						this.squares[`${file}${rank}`].removePiece();
 					}
 					this.prevSquare.removePiece();
 					if (newSquare.hasMine()) {
@@ -74,10 +101,14 @@ export default class Board {
 							}
 							this.disableClicks();
 							this.gameOver = true;
+						} else {
+							this.resetMS();
 						}
 						this.game.remove(newSquare.position);
+						let tokens = this.game.fen().split(" ");
+						tokens[3] = "-";
+						this.game.load(tokens.join(" "));
 						newSquare.removePiece();
-						this.resetMS();
 					} else {
 						if ("captured" in move) {
 							this.resetMS();
@@ -93,12 +124,15 @@ export default class Board {
 						if (this.game.in_checkmate()) {
 							this.status = `Game over, ${moveColor} is in checkmate.`;
 							this.disableClicks();
+							this.gameOver = true;
 						} else if (this.game.insufficient_material()) {
 							this.status = "Game over, insufficient material.";
 							this.disableClicks();
+							this.gameOver = true;
 						} else if (this.game.in_stalemate()) {
 							this.status = "Game over, stalemate position.";
 							this.disableClicks();
+							this.gameOver = true;
 							// } else if (this.game.in_threefold_repetition()) {
 							// 	this.status = "Game over, threefold repetition rule.";
 							// 	this.disableClicks();
@@ -121,11 +155,11 @@ export default class Board {
 			this.prevSquare = null;
 		}
 	}
-	
+
 	mouseMove(event) {
 		if (this.dragging) {
 			event.preventDefault();
-			const prevMousePos = [this.lastMousePos[0] - event.clientX, this.lastMousePos[1] - event.clientY];
+			let prevMousePos = [this.lastMousePos[0] - event.clientX, this.lastMousePos[1] - event.clientY];
 			this.lastMousePos = [event.clientX, event.clientY];
 
 			this.draggedPiece.style.top = `${this.draggedPiece.offsetTop - prevMousePos[1]}px`;
@@ -135,11 +169,11 @@ export default class Board {
 
 	init() {
 		for (let i = 0; i < 64; i++) {
-			const rank = 8 - Math.floor(i / 8);
-			const fileNum = i % 8;
-			const file = files[fileNum];
-			const bg = rank % 2 === fileNum % 2 ? "light" : "dark";
-			const square = new Square({
+			let rank = 8 - Math.floor(i / 8);
+			let fileNum = i % 8;
+			let file = files[fileNum];
+			let bg = rank % 2 === fileNum % 2 ? "light" : "dark";
+			let square = new Square({
 				rank,
 				file,
 				bg,
@@ -183,13 +217,16 @@ export default class Board {
 	swapTurn() {
 		let tokens = this.game.fen().split(" ");
 		tokens[1] = this.game.turn() === "b" ? "w" : "b";
+		tokens[3] = "-";
 		this.game.load(tokens.join(" "));
 	}
 
 	flipBoard() {
-		for (var i = 1; i < this.element.childNodes.length; i++) {
+		for (let i = 1; i < this.element.childNodes.length; i++) {
 			this.element.insertBefore(this.element.childNodes[i], this.element.firstChild);
 		}
+		this.perspective = this.perspective === "b" ? "w" : "b";
+		this.setLabels();
 	}
 
 	resetBoard() {
@@ -202,11 +239,12 @@ export default class Board {
 	}
 
 	setBoard() {
+		this.setLabels();
 		this.resetMS();
 		this.game.board().reverse().forEach((rank, ri) => {
 			rank.forEach((square, fi) => {
 				if (square !== null) {
-					const piece = new Piece({ color: square.color, type: square.type, size: this.squareSize });
+					let piece = new Piece({ color: square.color, type: square.type, size: this.squareSize });
 					this.squares[`${files[fi]}${ri + 1}`].addPiece(piece.element);
 					this.pieceElements.set(piece.element, piece);
 				}
@@ -214,6 +252,22 @@ export default class Board {
 		});
 		this.status = "White to move.";
 		this.statusCB(this.status);
+	}
+
+	setLabels() {
+		if (this.perspective === "w") {
+			Object.values(this.squares).forEach((s) => {
+				let labelRank = s.position.charAt(0) === "a";
+				let labelFile = s.position.charAt(1) === "1";
+				s.setLabels(labelRank, labelFile);
+			});
+		} else {
+			Object.values(this.squares).forEach((s) => {
+				let labelRank = s.position.charAt(0) === "h";
+				let labelFile = s.position.charAt(1) === "8";
+				s.setLabels(labelRank, labelFile);
+			});
+		}
 	}
 
 	resetMS() {
