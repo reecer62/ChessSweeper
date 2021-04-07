@@ -259,6 +259,8 @@ export default class Board {
 
 	resetBoard() {
 		this.gameOver = false;
+		this.currFlags = 0;
+		this.flagCounterCB(this.mineCount);
 		this.game.reset();
 		this.swapTurnsCB({ restart: true });
 		Object.values(this.squares).forEach((square) => {
@@ -308,6 +310,9 @@ export default class Board {
 		Object.values(this.squares).forEach((s) => {
 			s.resetMS();
 		});
+
+		this.currFlags = 0;
+		this.flagCounterCB(this.mineCount);
 
 		let mineLocs = [];
 		while (mineLocs.length < this.mineCount / 2) {
