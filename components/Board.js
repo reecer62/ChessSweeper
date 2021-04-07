@@ -4,11 +4,13 @@ import Square from "./Square.js";
 const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 export default class Board {
-	constructor({ selector, size, network, statusCB, swapTurnsCB }) {
+	constructor({ selector, size, network, mineCount, statusCB, swapTurnsCB, flagCounterCB }) {
 		this.size = size;
 		this.network = network;
+		this.mineCount = mineCount;
 		this.statusCB = statusCB;
 		this.swapTurnsCB = swapTurnsCB;
+		this.flagCounterCB = flagCounterCB;
 
 		this.element = document.querySelector(selector);
 		this.element.classList.add("Board");
@@ -29,6 +31,7 @@ export default class Board {
 		this.prevMove = {};
 
 		this.gameOver = false;
+		this.currFlags = 0;
 
 		this.init();
 	}
@@ -205,6 +208,15 @@ export default class Board {
 							s.sink();
 						}
 					});
+				},
+				flagCB: (inc) => {
+					if (this.currFlags + inc < 0 || this.currFlags + inc > this.mineCount) {
+						return false;
+					} else {
+						this.currFlags += inc;
+						this.flagCounterCB(this.mineCount - this.currFlags);
+						return true;
+					}
 				}
 			});
 			this.element.appendChild(square.element);
@@ -297,15 +309,14 @@ export default class Board {
 			s.resetMS();
 		});
 
-		let mineCount = 12;
 		let mineLocs = [];
-		while (mineLocs.length < mineCount / 2) {
+		while (mineLocs.length < this.mineCount / 2) {
 			let loc = Math.floor(Math.random() * Object.keys(this.squares).length / 2);
 			if (mineLocs.indexOf(loc) === -1) {
 				mineLocs.push(loc);
 			}
 		}
-		while (mineLocs.length < mineCount) {
+		while (mineLocs.length < this.mineCount) {
 			let loc = Math.floor(Math.random() * (Object.keys(this.squares).length - Object.keys(this.squares).length / 2) + Object.keys(this.squares).length / 2);
 			if (mineLocs.indexOf(loc) === -1) {
 				mineLocs.push(loc);

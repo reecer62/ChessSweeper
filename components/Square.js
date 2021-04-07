@@ -1,12 +1,13 @@
 export default class Square {
 	element;
 
-	constructor({ rank, file, bg, mineCB, noAdjacentMinesCB }) {
+	constructor({ rank, file, bg, mineCB, noAdjacentMinesCB, flagCB }) {
 		this.rank = rank;
 		this.file = file;
 		this.bg = bg;
 		this.mineCB = mineCB;
 		this.noAdjacentMinesCB = noAdjacentMinesCB;
+		this.flagCB = flagCB;
 
 		this.piece = null;
 		this.msStatus = "";
@@ -30,6 +31,7 @@ export default class Square {
 					if (this.flag !== null) {
 						this.element.removeChild(this.flag);
 						this.flag = null;
+						this.flagCB(-1);
 					}
 					this.sink();
 					if (this.mine !== null) {
@@ -37,13 +39,17 @@ export default class Square {
 					}
 				} else if (event.button === 2) {
 					if (this.flag !== null) {
-						this.element.removeChild(this.flag);
-						this.flag = null;
+						if (this.flagCB(-1)) {
+							this.element.removeChild(this.flag);
+							this.flag = null;
+						}
 					} else {
-						this.flag = document.createElement("img");
-						this.flag.setAttribute("src", "assets/minesweeper/flag.svg");
-						this.displayChild(this.flag);
-						this.element.appendChild(this.flag);
+						if (this.flagCB(1)) {
+							this.flag = document.createElement("img");
+							this.flag.setAttribute("src", "assets/minesweeper/flag.svg");
+							this.displayChild(this.flag);
+							this.element.appendChild(this.flag);
+						}
 					}
 				}
 			}
@@ -101,8 +107,10 @@ export default class Square {
 
 	removeFlag() {
 		if (this.flag !== null) {
-			this.element.removeChild(this.flag);
-			this.flag = null;
+			if (this.flagCB(-1)) {
+				this.element.removeChild(this.flag);
+				this.flag = null;
+			}
 		}
 	}
 

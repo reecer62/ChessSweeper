@@ -2,11 +2,34 @@ import Network from "./components/Network.js";
 import Board from "./components/Board.js";
 import Timer from "./components/Timer.js";
 
-const network = new Network({ ip: "localhost", port: "25568" }); //173.95.165.30
-const board = new Board({ selector: "#board", size: "400px", network, statusCB: (text) => document.getElementById("status").innerHTML = text, swapTurnsCB: swapTimer });
+const network = new Network({
+	ip: "localhost",
+	port: "25568"
+}); //173.95.165.30
+let mineCount = 12;
+document.getElementById("flagCounter").innerHTML = mineCount;
+const board = new Board({
+	selector: "#board",
+	size: "400px",
+	network,
+	mineCount,
+	statusCB: (text) => document.getElementById("status").innerHTML = text,
+	swapTurnsCB: swapTimer,
+	flagCounterCB: (text) => document.getElementById("flagCounter").innerHTML = text
+});
 
-const whiteTimer = new Timer({ selector: "#whiteTimer", duration: 300, increment: 5, flagCB: () => board.flag("w") });
-const blackTimer = new Timer({ selector: "#blackTimer", duration: 300, increment: 5, flagCB: () => board.flag("b") });
+const whiteTimer = new Timer({
+	selector: "#whiteTimer",
+	duration: 300,
+	increment: 5,
+	flagCB: () => board.flag("w")
+});
+const blackTimer = new Timer({
+	selector: "#blackTimer",
+	duration: 300,
+	increment: 5,
+	flagCB: () => board.flag("b")
+});
 function swapTimer({ color, gameOver = false, restart = false }) {
 	if (gameOver) {
 		whiteTimer.stop(false);

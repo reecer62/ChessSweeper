@@ -4,11 +4,11 @@
 
 body {
 	min-height: 100%;
+	overflow: hidden;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	overflow: hidden;
 }
 
 #container {
@@ -30,6 +30,13 @@ body {
 
 .centerContainer {
 	grid-area: centerContainer;
+	display: flex;
+	align-items: center;
+	padding: 0 0 0 25px;
+}
+
+.centerContainer img {
+	width: 20pt;
 }
 
 .whiteContainer {
