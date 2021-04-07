@@ -1,7 +1,5 @@
 make rank/file labels more visible
-allow pieces to be dragged back onto their square without sinking square below it
 make possible moves highlight
-add time controls
 make mines more apparent when piece lands on it
 sometimes it bugs and you have to drag twice to move pieces
 make threefold repetition not break all the time

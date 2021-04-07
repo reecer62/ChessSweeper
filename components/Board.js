@@ -4,28 +4,31 @@ import Square from "./Square.js";
 const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 export default class Board {
-	constructor({ selector, size, network, statusCB }) {
+	constructor({ selector, size, network, statusCB, swapTurnsCB }) {
 		this.size = size;
 		this.network = network;
 		this.statusCB = statusCB;
-		this.squares = {}; //board positions to class objects
-		this.squareElements = new Map(); //dom objects to class objects
-		this.pieceElements = new Map(); //dom objects to class objects
-		this.game = new Chess();
-		this.status = "";
-		this.dragging = false;
-		this.lastMousePos = [];
-		this.draggedPiece;
-		this.prevSquare;
-		this.perspective = "w";
-		this.prevMove = {};
-
-		this.gameOver = false;
+		this.swapTurnsCB = swapTurnsCB;
 
 		this.element = document.querySelector(selector);
 		this.element.classList.add("Board");
 		this.element.style.width = this.size;
 		this.element.style.height = this.size;
+
+		this.squares = {}; //board positions to class objects
+		this.squareElements = new Map(); //dom objects to class objects
+		this.pieceElements = new Map(); //dom objects to class objects
+		this.game = new Chess();
+
+		this.perspective = "w";
+		this.status = "";
+		this.dragging = false;
+		this.lastMousePos = [];
+		this.draggedPiece;
+		this.prevSquare;
+		this.prevMove = {};
+
+		this.gameOver = false;
 
 		this.init();
 	}
@@ -35,7 +38,7 @@ export default class Board {
 			return;
 		}
 		let piece = document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Piece"))
-		if (piece && this.game.turn() === this.pieceElements.get(piece).color) {
+		if (event.button === 0 && piece && this.game.turn() === this.pieceElements.get(piece).color) {
 			event.preventDefault();
 			this.dragging = true;
 			this.prevSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Square")));
@@ -143,6 +146,7 @@ export default class Board {
 							}
 						}
 					}
+					this.swapTurnsCB({ color: this.game.turn(), gameOver: this.gameOver });
 					this.statusCB(this.status);
 				}
 			}
@@ -219,6 +223,18 @@ export default class Board {
 		tokens[1] = this.game.turn() === "b" ? "w" : "b";
 		tokens[3] = "-";
 		this.game.load(tokens.join(" "));
+		this.swapTurnsCB({ color: this.game.turn() });
+	}
+
+	flag(color) {
+		let moveColor = "White";
+		if (color === "b") {
+			moveColor = "Black";
+		}
+		this.status = `Game over, ${moveColor} flagged.`;
+		this.disableClicks();
+		this.gameOver = true;
+		this.statusCB(this.status);
 	}
 
 	flipBoard() {
@@ -232,9 +248,15 @@ export default class Board {
 	resetBoard() {
 		this.gameOver = false;
 		this.game.reset();
+		this.swapTurnsCB({ restart: true });
 		Object.values(this.squares).forEach((square) => {
 			square.clear();
 		});
+		if (Object.keys(this.prevMove).length !== 0) {
+			this.squares[this.prevMove.from].element.classList.remove("highlighted");
+			this.squares[this.prevMove.to].element.classList.remove("highlighted");
+			this.prevMove = {};
+		}
 		this.setBoard();
 	}
 

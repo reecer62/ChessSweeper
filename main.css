@@ -11,11 +11,57 @@ body {
 	overflow: hidden;
 }
 
+#container {
+	display: grid;
+	grid-template-rows: 1fr auto 1fr;
+	grid-template-columns: 1fr auto 1fr;
+	grid-template-areas:
+		". board blackContainer"
+		". board centerContainer"
+		". board whiteContainer";
+}
+
+.blackContainer {
+	grid-area: blackContainer;
+	display: flex;
+	align-items: flex-start;
+	padding: 100px 50px 0;
+}
+
+.centerContainer {
+	grid-area: centerContainer;
+}
+
+.whiteContainer {
+	grid-area: whiteContainer;
+	display: flex;
+	align-items: flex-end;
+	padding: 0 0 100px 50px;
+}
+
+#container.flipped {
+	grid-template-areas:
+		". board whiteContainer"
+		". board centerContainer"
+		". board blackContainer";
+}
+
+#container.flipped .whiteContainer {
+	align-items: flex-start;
+	padding: 100px 50px 0;
+}
+
+#container.flipped .blackContainer {
+	align-items: flex-end;
+	padding: 0 0 100px 50px;
+}
+
 .Board {
 	border: 10px solid black;
 	display: grid;
 	grid-template-columns: repeat(8, 1fr);
 	grid-template-rows: repeat(8, 1fr);
+	grid-area: board;
 }
 
 .Square {

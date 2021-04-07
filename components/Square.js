@@ -26,7 +26,7 @@ export default class Square {
 
 		this.element.onmouseup = (event) => {
 			if (this.canClick && this.clickedOn && this.msStatus == "raised" && this.element === document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Square"))) {
-				if (event.button == 0) {
+				if (event.button === 0) {
 					if (this.flag !== null) {
 						this.element.removeChild(this.flag);
 						this.flag = null;
@@ -35,7 +35,7 @@ export default class Square {
 					if (this.mine !== null) {
 						this.mineCB();
 					}
-				} else if (event.button == 2) {
+				} else if (event.button === 2) {
 					if (this.flag !== null) {
 						this.element.removeChild(this.flag);
 						this.flag = null;
@@ -53,6 +53,12 @@ export default class Square {
 		this.element.onmousedown = (event) => {
 			this.clickedOn = true;
 		};
+
+		this.element.onmousemove = (event) => {
+			if (document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Square")) !== this.element) {
+				this.clickedOn = false;
+			}
+		}
 	}
 
 	addPiece(piece) {
