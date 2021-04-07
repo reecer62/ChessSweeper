@@ -65,12 +65,12 @@ export default class Board {
 					promotion: "q"
 				});
 				if (move !== null) {
-					this.prevSquare.element.classList.add("highlighted");
-					newSquare.element.classList.add("highlighted");
 					if (Object.keys(this.prevMove).length !== 0) {
 						this.squares[this.prevMove.from].element.classList.remove("highlighted");
 						this.squares[this.prevMove.to].element.classList.remove("highlighted");
 					}
+					this.prevSquare.element.classList.add("highlighted");
+					newSquare.element.classList.add("highlighted");
 					this.prevMove = move;
 					if (move.promotion === "q") { //promotion
 						let piece = this.pieceElements.get(this.draggedPiece);
