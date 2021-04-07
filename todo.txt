@@ -1,4 +1,3 @@
-put ruleset on left side
 make rank/file labels more visible
 make possible moves highlight
 make mines more apparent when piece lands on it
