@@ -14,12 +14,30 @@
 </head>
 
 <body oncontextmenu="return false">
-	<div id="status"></div>
 	<div class="header">
-		<button id="flipBoard">Flip Board</button>
-		<button id="resetBoard">Reset Board</button>
+		<div id="status"></div>
 	</div>
 	<div id="container">
+		<div class="rules">
+			<h1>ChessSweeper Rules</h1>
+			<ol class="rulesBody">
+				<li>
+					<p>Normal Chess rules apply</p>
+				</li>
+				<li>
+					<p>Normal Minesweeper rules apply</p>
+				</li>
+				<li>
+					<p>If you reveal a bomb, you lose your turn</p>
+				</li>
+				<li>
+					<p>If you place a piece on a bomb, you lose that piece</p>
+				</li>
+				<li>
+					<p>If a piece is removed from the Chess board, the Minesweeper board is reset</p>
+				</li>
+			</ol>
+		</div>
 		<div id="board"></div>
 		<div class="blackContainer">
 			<div id="blackTimer"></div>
@@ -30,6 +48,12 @@
 		</div>
 		<div class="whiteContainer">
 			<div id="whiteTimer"></div>
+		</div>
+	</div>
+	<div class="footer">
+		<div class="buttons">
+			<button id="flipBoard">Flip Board</button>
+			<button id="resetBoard">Reset Board</button>
 		</div>
 	</div>
 	<script type="module" src="main.js"></script>

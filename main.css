@@ -8,7 +8,30 @@ body {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
-	align-items: center;
+	align-items: stretch;
+}
+
+.header, .footer {
+	align-self: center;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: stretch;
+}
+
+.header {
+	margin-bottom: 10px;
+}
+
+.footer .buttons {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	column-gap: 10px;
+	margin-top: 10px;
+}
+
+#status {
+	text-align: center;
 }
 
 #container {
@@ -16,9 +39,36 @@ body {
 	grid-template-rows: 1fr auto 1fr;
 	grid-template-columns: 1fr auto 1fr;
 	grid-template-areas:
-		". board blackContainer"
-		". board centerContainer"
-		". board whiteContainer";
+		"rules board blackContainer"
+		"rules board centerContainer"
+		"rules board whiteContainer";
+}
+
+.rules {
+	grid-area: rules;
+	display: flex;
+	flex-direction: column;
+	padding: 0 100px 0 50px;
+}
+
+.rules h1 {
+	border-bottom: 2px solid black;
+	text-align: center;
+	margin-bottom: 5px;
+	padding-bottom: 10px;
+}
+
+.rulesBody {
+	margin: 0 15px;
+}
+
+.rulesBody li {
+	margin: 15px 0;
+	font-weight: bold;
+}
+
+.rulesBody li > p {
+	font-weight: normal;
 }
 
 .blackContainer {

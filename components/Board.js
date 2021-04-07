@@ -99,6 +99,11 @@ export default class Board {
 					}
 					this.prevSquare.removePiece();
 					if (newSquare.hasMine()) {
+						this.game.remove(newSquare.position);
+						let tokens = this.game.fen().split(" ");
+						tokens[3] = "-";
+						this.game.load(tokens.join(" "));
+						newSquare.removePiece();
 						if (move.piece === "k") {
 							if (move.color === "b") {
 								this.status = "Game over, Black's king blew up!";
@@ -108,13 +113,20 @@ export default class Board {
 							this.disableClicks();
 							this.gameOver = true;
 						} else {
-							this.resetMS();
+							this.swapTurn();
+							if (this.game.in_check()) {
+								if (move.color === "b") {
+									this.status = "Game over, Black blew up a piece while in check!";
+								} else {
+									this.status = "Game over, White blew up a piece while in check!";
+								}
+								this.disableClicks();
+								this.gameOver = true;
+							} else {
+								this.resetMS();
+							}
+							this.swapTurn();
 						}
-						this.game.remove(newSquare.position);
-						let tokens = this.game.fen().split(" ");
-						tokens[3] = "-";
-						this.game.load(tokens.join(" "));
-						newSquare.removePiece();
 					} else {
 						if ("captured" in move) {
 							this.resetMS();
@@ -195,6 +207,7 @@ export default class Board {
 						this.status = `Game over, ${moveColor} blew up while in check!`;
 						this.disableClicks();
 						this.gameOver = true;
+						this.swapTurnsCB({ color: this.game.turn(), gameOver: this.gameOver });
 					} else {
 						this.status = `${moveColor} blew up! ${notMoveColor} to move.`;
 						this.swapTurn();
