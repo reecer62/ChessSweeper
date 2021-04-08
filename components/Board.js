@@ -32,6 +32,7 @@ export default class Board {
 
 		this.gameOver = false;
 		this.currFlags = 0;
+		this.prevPositions = {};
 
 		this.init();
 	}
@@ -134,6 +135,16 @@ export default class Board {
 						newSquare.addPiece(this.draggedPiece);
 					}
 
+					let fen = this.game.fen().split(" ");
+					fen.splice(fen.length - 1, 1);
+					fen.splice(fen.length - 1, 1);
+					fen = fen.join(" ");
+					if (fen in this.prevPositions) {
+						this.prevPositions[fen] += 1;
+					} else {
+						this.prevPositions[fen] = 1;
+					}
+
 					if (!this.gameOver) {
 						let moveColor = "White";
 						if (this.game.turn() === "b") {
@@ -150,15 +161,20 @@ export default class Board {
 						} else if (this.game.in_stalemate()) {
 							this.status = "Game over, stalemate position.";
 							this.disableClicks();
-							this.gameOver = true;
-							// } else if (this.game.in_threefold_repetition()) {
-							// 	this.status = "Game over, threefold repetition rule.";
-							// 	this.disableClicks();
+							this.gameOver = true;								
 						} else {
 							this.status = `${moveColor} to move.`;
 							if (this.game.in_check()) {
 								this.status += ` ${moveColor} is in check.`;
 							}
+
+							Object.values(this.prevPositions).forEach((v) => {
+								if (v >= 3) {
+									this.status = "Game over, threefold repetition rule.";
+									this.disableClicks();
+									this.gameOver = true;
+								}
+							});
 						}
 					}
 					this.swapTurnsCB({ color: this.game.turn(), gameOver: this.gameOver });

@@ -1,6 +1,5 @@
 make rank/file labels more visible
 make possible moves highlight
 make mines more apparent when piece lands on it
-sometimes it bugs and you have to drag twice to move pieces
-make threefold repetition not break all the time
+sometimes it bugs and you have to drag twice to move pieces (???)
 make spectators able to see minesweeper state for each player (white/black dot/flag in bottom left corner)
