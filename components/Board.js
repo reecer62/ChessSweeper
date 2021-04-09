@@ -30,7 +30,7 @@ export default class Board {
 		this.prevSquare;
 		this.prevMove = {};
 
-		this.gameOver = false;
+		this.gameOver = true;
 		this.currFlags = 0;
 		this.prevPositions = {};
 
@@ -161,7 +161,7 @@ export default class Board {
 						} else if (this.game.in_stalemate()) {
 							this.status = "Game over, stalemate position.";
 							this.disableClicks();
-							this.gameOver = true;								
+							this.gameOver = true;
 						} else {
 							this.status = `${moveColor} to move.`;
 							if (this.game.in_check()) {
@@ -287,7 +287,7 @@ export default class Board {
 	}
 
 	resetBoard() {
-		this.gameOver = false;
+		this.gameOver = true;
 		this.currFlags = 0;
 		this.flagCounterCB(this.mineCount);
 		this.game.reset();
@@ -315,7 +315,7 @@ export default class Board {
 				}
 			});
 		});
-		this.status = "White to move.";
+		this.status = "Game has not started.";
 		this.statusCB(this.status);
 	}
 
