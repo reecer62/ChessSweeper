@@ -28,14 +28,11 @@ export default class Square {
 		this.element.onmouseup = (event) => {
 			if (this.canClick && this.clickedOn && this.msStatus == "raised" && this.element === document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Square"))) {
 				if (event.button === 0) {
-					if (this.flag !== null) {
-						this.element.removeChild(this.flag);
-						this.flag = null;
-						this.flagCB(-1);
-					}
-					this.sink();
-					if (this.mine !== null) {
-						this.mineCB();
+					if (this.flag === null) {
+						this.sink();
+						if (this.mine !== null) {
+							this.mineCB();
+						}
 					}
 				} else if (event.button === 2) {
 					if (this.flag !== null) {
