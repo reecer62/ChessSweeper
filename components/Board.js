@@ -30,7 +30,7 @@ export default class Board {
 		this.prevSquare;
 		this.prevMove = {};
 
-		this.gameOver = true;
+		this.gameOver = false;
 		this.currFlags = 0;
 		this.prevPositions = {};
 
@@ -287,7 +287,7 @@ export default class Board {
 	}
 
 	resetBoard() {
-		this.gameOver = true;
+		this.gameOver = false;
 		this.currFlags = 0;
 		this.flagCounterCB(this.mineCount);
 		this.game.reset();
