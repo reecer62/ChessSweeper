@@ -315,7 +315,7 @@ export default class Board {
 				}
 			});
 		});
-		this.status = "Game has not started.";
+		this.status = "White to move.";
 		this.statusCB(this.status);
 	}
 
