@@ -1,22 +1,17 @@
 export default class Square {
 	element;
 
-	constructor({ rank, file, bg, mineCB, noAdjacentMinesCB, flagCB }) {
+	constructor({ rank, file, bg, flagCB }) {
 		this.rank = rank;
 		this.file = file;
 		this.bg = bg;
-		this.mineCB = mineCB;
-		this.noAdjacentMinesCB = noAdjacentMinesCB;
 		this.flagCB = flagCB;
 
 		this.piece = null;
 		this.msStatus = "";
 		this.flag = null;
 		this.clickedOn = false;
-		this.mine = null;
-		this.canClick = true;
-		this.adjacentMines = 0;
-		this.mineCount = null;
+		this.asset = null;
 		this.rankLabel = null;
 		this.fileLabel = null;
 
@@ -25,35 +20,7 @@ export default class Square {
 		this.element.classList.add("Square");
 		this.element.classList.add(this.bg);
 
-		this.element.onmouseup = (event) => {
-			if (this.canClick && this.clickedOn && this.msStatus == "raised" && this.element === document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Square"))) {
-				if (event.button === 0) {
-					if (this.flag === null) {
-						this.sink();
-						if (this.mine !== null) {
-							this.mineCB();
-						}
-					}
-				} else if (event.button === 2) {
-					if (this.flag !== null) {
-						if (this.flagCB(-1)) {
-							this.element.removeChild(this.flag);
-							this.flag = null;
-						}
-					} else {
-						if (this.flagCB(1)) {
-							this.flag = document.createElement("img");
-							this.flag.setAttribute("src", "assets/minesweeper/flag.svg");
-							this.displayChild(this.flag);
-							this.element.appendChild(this.flag);
-						}
-					}
-				}
-			}
-			this.clickedOn = false;
-		};
-
-		this.element.onmousedown = (event) => {
+		this.element.onmousedown = () => {
 			this.clickedOn = true;
 		};
 
@@ -73,9 +40,6 @@ export default class Square {
 		if (this.flag !== null) {
 			this.displayChild(this.flag);
 		}
-		if (this.mineCount !== null) {
-			this.displayChild(this.mineCount);
-		}
 	}
 
 	removePiece() {
@@ -85,12 +49,6 @@ export default class Square {
 		}
 		if (this.flag !== null) {
 			this.displayChild(this.flag);
-		}
-		if (this.mineCount !== null) {
-			this.displayChild(this.mineCount);
-		}
-		if (this.mine !== null) {
-			this.displayChild(this.mine);
 		}
 	}
 
@@ -111,28 +69,6 @@ export default class Square {
 		}
 	}
 
-	addMine() {
-		this.mine = document.createElement("img");
-		this.mine.setAttribute("src", "assets/minesweeper/mine.svg");
-	}
-
-	removeMine() {
-		if (this.mine !== null) {
-			if (this.msStatus == "sunken") {
-				this.element.removeChild(this.mine);
-			}
-			this.mine = null;
-		}
-	}
-
-	hasMine() {
-		return this.mine !== null;
-	}
-
-	addAdjacentMine() {
-		this.adjacentMines++;
-	}
-
 	displayChild(child) {
 		if (this.piece !== null) {
 			child.style.position = "absolute";
@@ -149,20 +85,6 @@ export default class Square {
 			child.style.height = `${this.element.clientHeight * .5}px`;
 			child.style.zIndex = null;
 		}
-	}
-
-	clear() {
-		this.element.textContent = "";
-		this.piece = null;
-		this.msStatus = "";
-		this.flag = null;
-		this.clickedOn = false;
-		this.mine = null;
-		this.canClick = true;
-		this.adjacentMines = 0;
-		this.mineCount = null;
-		this.rankLabel = null;
-		this.fileLabel = null;
 	}
 
 	fixSize() {
@@ -205,39 +127,27 @@ export default class Square {
 		this.element.classList.remove("sunken");
 		this.element.classList.add("raised");
 		this.msStatus = "raised";
-		if (this.mineCount !== null) {
-			this.element.removeChild(this.mineCount);
-			this.mineCount = null;
+		if (this.asset !== null) {
+			this.element.removeChild(this.asset);
+			this.asset = null;
 		}
 	}
 
-	sink() {
+	sink(asset) {
 		this.element.classList.remove("raised");
 		this.element.classList.add("sunken");
 		this.msStatus = "sunken";
-		if (this.mine !== null) {
-			this.displayChild(this.mine);
-			this.element.appendChild(this.mine);
-		} else if (this.adjacentMines !== 0) {
-			this.mineCount = document.createElement("img");
-			this.mineCount.setAttribute("src", `assets/minesweeper/${this.adjacentMines}.svg`);
-			this.displayChild(this.mineCount);
-			this.element.appendChild(this.mineCount);
-		} else {
-			this.noAdjacentMinesCB(this.position);
+		if (asset) {
+			this.asset = document.createElement("img");
+			this.asset.setAttribute("src", `assets/minesweeper/${asset}.svg`);
+			this.displayChild(this.asset);
+			this.element.appendChild(this.asset);
 		}
 	}
 
 	resetMS() {
-		this.removeMine();
 		this.removeFlag();
 		this.raise();
-
-		this.adjacentMines = 0;
-	}
-
-	disableClicks() {
-		this.canClick = false;
 	}
 
 	getMSStatus() {

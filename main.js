@@ -6,13 +6,10 @@ const network = new Network({
 	ip: "localhost",
 	port: "25568"
 }); //173.95.165.30
-let mineCount = 12;
-document.getElementById("flagCounter").innerHTML = mineCount;
 const board = new Board({
 	selector: "#board",
 	size: "400px",
 	network,
-	mineCount,
 	statusCB: (text) => document.getElementById("status").innerHTML = text,
 	swapTurnsCB: swapTimer,
 	flagCounterCB: (text) => document.getElementById("flagCounter").innerHTML = text
@@ -20,23 +17,52 @@ const board = new Board({
 
 network.addOnMessage("setFen", (data) => {
 	document.getElementById("claimWhite").disabled = data.whitePlayer;
+	if (data.whitePlayer) {
+		document.getElementById("youAreWhite").innerHTML = "White is claimed.";
+	} else {
+		document.getElementById("youAreWhite").innerHTML = "White is not claimed.";
+	}
 	document.getElementById("claimBlack").disabled = data.blackPlayer;
-	board.setFen(data.fen, data.mineLocs, !(data.whitePlayer && data.blackPlayer));
-	document.getElementById("flagCounter").innerHTML = data.mineLocs.length;
+	if (data.blackPlayer) {
+		document.getElementById("youAreBlack").innerHTML = "Black is claimed.";
+	} else {
+		document.getElementById("youAreBlack").innerHTML = "Black is not claimed.";
+	}
+	board.setFen(data.fen, data.mineCount, data.prevMove, !(data.whitePlayer && data.blackPlayer));
+	document.getElementById("flagCounter").innerHTML = data.mineCount;
 });
 network.addOnMessage("resetBoard", (data) => {
-	board.setFen(data.fen, data.mineLocs, data.gameOver);
+	board.setFen(data.fen, data.mineCount, data.prevMove, !(data.whitePlayer && data.blackPlayer));
 	document.getElementById("claimWhite").disabled = false;
 	document.getElementById("claimBlack").disabled = false;
+	document.getElementById("youAreWhite").innerHTML = "White is not claimed.";
+	document.getElementById("youAreBlack").innerHTML = "Black is not claimed.";
 });
-network.addOnMessage("whiteClaimed", () => {
-	document.getElementById("claimWhite").disabled = true;
+network.addOnMessage("whiteClaimed", (data) => {
+	document.getElementById("claimWhite").disabled = data.taken;
+	if (data.taken) {
+		document.getElementById("youAreWhite").innerHTML = "White is claimed.";
+	} else {
+		document.getElementById("youAreWhite").innerHTML = "White is not claimed.";
+	}
 });
-network.addOnMessage("blackClaimed", () => {
-	document.getElementById("claimBlack").disabled = true;
+network.addOnMessage("blackClaimed", (data) => {
+	document.getElementById("claimBlack").disabled = data.taken;
+	if (data.taken) {
+		document.getElementById("youAreBlack").innerHTML = "Black is claimed.";
+	} else {
+		document.getElementById("youAreBlack").innerHTML = "Black is not claimed.";
+	}
 });
 network.addOnMessage("startGame", () => {
 	board.startGame();
+});
+network.addOnMessage("moveAll", (data) => {
+	if (data) {
+		board.move(data);
+	} else {
+		board.skipTurn();
+	}
 });
 network.connect();
 
@@ -84,10 +110,7 @@ document.getElementById("flipBoard").onclick = () => {
 	board.flipBoard();
 };
 document.getElementById("resetBoard").onclick = () => {
-	let result = network.send({ action: "resetBoard" });
-	if (!result) { //change this when autoreconnect is done
-		board.resetBoard();
-	}
+	network.send({ action: "resetBoard" });
 };
 
 document.getElementById("claimWhite").onclick = () => {
@@ -95,6 +118,7 @@ document.getElementById("claimWhite").onclick = () => {
 		board.color = "w";
 		document.getElementById("claimWhite").disabled = true;
 		document.getElementById("claimBlack").disabled = true;
+		document.getElementById("youAreWhite").innerHTML = "You are White.";
 		network.removeOnMessage("claimWhite");
 	});
 	network.send({ action: "claimWhite" });
@@ -104,6 +128,7 @@ document.getElementById("claimBlack").onclick = () => {
 		board.color = "b";
 		document.getElementById("claimWhite").disabled = true;
 		document.getElementById("claimBlack").disabled = true;
+		document.getElementById("youAreBlack").innerHTML = "You are Black."
 		network.removeOnMessage("claimBlack");
 	});
 	network.send({ action: "claimBlack" });

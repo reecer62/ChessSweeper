@@ -3,23 +3,38 @@ export default class Network {
 		this.ip = ip;
 		this.port = port;
 
+		this.reconnect = true;
 		this.ws = null;
+		// this.retry = 2000;
 		this.onMessage = {};
 	}
 
 	connect() {
+		this.reconnect = true;
 		this.ws = new WebSocket(`ws://${this.ip}:${this.port}`);
 
 		this.ws.onopen = () => {
-			console.log("Aaaaaaaaaaaaaaaaannnddddddddddd... OPEN!")
+			// this.retry = 2000;
+			console.log("Aaaaaaaaaaaaaaaaannnddddddddddd... OPEN!");
 		};
+
+		// this.ws.onclose = () => {
+		// 	console.log("Connection closed")
+		// 	if (this.reconnect) {
+		// 		console.log("Retrying connection in", this.retry / 1000, "seconds...");
+		// 		window.setTimeout(() => {
+		// 			this.retry = Math.min(this.retry * 2, 30000);
+		// 			this.connect();
+		// 		}, this.retry);
+		// 	}
+		// };
 
 		this.ws.onmessage = (event) => {
 			let data = JSON.parse(event.data);
 			if (data.action in this.onMessage) {
 				if ("args" in data) {
 					if ("error" in data.args) {
-						console.log(data.args.error)
+						console.log(data.args.error);
 					} else {
 						this.onMessage[data.action](data.args);
 					}
@@ -30,6 +45,11 @@ export default class Network {
 				console.log(`NO HANDLER: ${JSON.stringify(data)}`);
 			}
 		};
+	}
+
+	disconnect() {
+		this.reconnect = false;
+		this.ws = null;
 	}
 
 	addOnMessage(action, fun) {

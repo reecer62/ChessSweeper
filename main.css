@@ -13,12 +13,14 @@ body {
 
 #container {
 	display: grid;
-	grid-template-rows: auto auto auto auto 1fr;
+	grid-template-rows: auto auto 1fr auto 1fr auto auto;
 	grid-template-columns: 1fr auto 1fr;
 	grid-template-areas:
 		". status ."
 		"rules board blackContainer"
+		"rules board blackTimer"
 		"rules board centerContainer"
+		"rules board whiteTimer"
 		"rules board whiteContainer"
 		"rules footer .";
 }
@@ -27,19 +29,19 @@ body {
 	grid-template-areas:
 		". status ."
 		"rules board whiteContainer"
+		"rules board whiteTimer"
 		"rules board centerContainer"
+		"rules board blackTimer"
 		"rules board blackContainer"
 		"rules footer .";
 }
 
 #container.flipped .whiteContainer {
 	flex-direction: column-reverse;
-	padding: 100px 50px 0;
 }
 
 #container.flipped .blackContainer {
 	flex-direction: column-reverse;
-	padding: 0 50px 100px 50px;
 }
 
 .footer {
@@ -91,7 +93,13 @@ body {
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-start;
-	padding: 100px 50px 0;
+
+}
+
+#blackTimer {
+	grid-area: blackTimer;
+	display: flex;
+	align-items: center;
 }
 
 .centerContainer {
@@ -105,12 +113,18 @@ body {
 	width: 20pt;
 }
 
+#whiteTimer {
+	grid-area: whiteTimer;
+	display: flex;
+	align-items: center;
+}
+
 .whiteContainer {
 	grid-area: whiteContainer;
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-end;
-	padding: 0 50px 100px 50px;
+
 }
 
 .Board {
