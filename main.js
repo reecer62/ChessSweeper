@@ -18,6 +18,28 @@ const board = new Board({
 	flagCounterCB: (text) => document.getElementById("flagCounter").innerHTML = text
 });
 
+network.addOnMessage("setFen", (data) => {
+	document.getElementById("claimWhite").disabled = data.whitePlayer;
+	document.getElementById("claimBlack").disabled = data.blackPlayer;
+	board.setFen(data.fen, data.mineLocs, !(data.whitePlayer && data.blackPlayer));
+	document.getElementById("flagCounter").innerHTML = data.mineLocs.length;
+});
+network.addOnMessage("resetBoard", (data) => {
+	board.setFen(data.fen, data.mineLocs, data.gameOver);
+	document.getElementById("claimWhite").disabled = false;
+	document.getElementById("claimBlack").disabled = false;
+});
+network.addOnMessage("whiteClaimed", () => {
+	document.getElementById("claimWhite").disabled = true;
+});
+network.addOnMessage("blackClaimed", () => {
+	document.getElementById("claimBlack").disabled = true;
+});
+network.addOnMessage("startGame", () => {
+	board.startGame();
+});
+network.connect();
+
 const whiteTimer = new Timer({
 	selector: "#whiteTimer",
 	duration: 300,
@@ -62,5 +84,27 @@ document.getElementById("flipBoard").onclick = () => {
 	board.flipBoard();
 };
 document.getElementById("resetBoard").onclick = () => {
-	board.resetBoard();
+	let result = network.send({ action: "resetBoard" });
+	if (!result) { //change this when autoreconnect is done
+		board.resetBoard();
+	}
+};
+
+document.getElementById("claimWhite").onclick = () => {
+	network.addOnMessage("claimWhite", () => {
+		board.color = "w";
+		document.getElementById("claimWhite").disabled = true;
+		document.getElementById("claimBlack").disabled = true;
+		network.removeOnMessage("claimWhite");
+	});
+	network.send({ action: "claimWhite" });
+};
+document.getElementById("claimBlack").onclick = () => {
+	network.addOnMessage("claimBlack", () => {
+		board.color = "b";
+		document.getElementById("claimWhite").disabled = true;
+		document.getElementById("claimBlack").disabled = true;
+		network.removeOnMessage("claimBlack");
+	});
+	network.send({ action: "claimBlack" });
 };

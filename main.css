@@ -4,23 +4,46 @@
 
 body {
 	min-height: 100%;
-	overflow: hidden;
+	/* overflow: hidden; */
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: stretch;
 }
 
-.header, .footer {
-	align-self: center;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: stretch;
+#container {
+	display: grid;
+	grid-template-rows: auto auto auto auto 1fr;
+	grid-template-columns: 1fr auto 1fr;
+	grid-template-areas:
+		". status ."
+		"rules board blackContainer"
+		"rules board centerContainer"
+		"rules board whiteContainer"
+		"rules footer .";
 }
 
-.header {
-	margin-bottom: 10px;
+#container.flipped {
+	grid-template-areas:
+		". status ."
+		"rules board whiteContainer"
+		"rules board centerContainer"
+		"rules board blackContainer"
+		"rules footer .";
+}
+
+#container.flipped .whiteContainer {
+	flex-direction: column-reverse;
+	padding: 100px 50px 0;
+}
+
+#container.flipped .blackContainer {
+	flex-direction: column-reverse;
+	padding: 0 50px 100px 50px;
+}
+
+.footer {
+	grid-area: footer;
 }
 
 .footer .buttons {
@@ -32,16 +55,8 @@ body {
 
 #status {
 	text-align: center;
-}
-
-#container {
-	display: grid;
-	grid-template-rows: 1fr auto 1fr;
-	grid-template-columns: 1fr auto 1fr;
-	grid-template-areas:
-		"rules board blackContainer"
-		"rules board centerContainer"
-		"rules board whiteContainer";
+	margin-bottom: 10px;
+	grid-area: status;
 }
 
 .rules {
@@ -74,7 +89,8 @@ body {
 .blackContainer {
 	grid-area: blackContainer;
 	display: flex;
-	align-items: flex-start;
+	flex-direction: column;
+	justify-content: flex-start;
 	padding: 100px 50px 0;
 }
 
@@ -92,25 +108,9 @@ body {
 .whiteContainer {
 	grid-area: whiteContainer;
 	display: flex;
-	align-items: flex-end;
-	padding: 0 0 100px 50px;
-}
-
-#container.flipped {
-	grid-template-areas:
-		". board whiteContainer"
-		". board centerContainer"
-		". board blackContainer";
-}
-
-#container.flipped .whiteContainer {
-	align-items: flex-start;
-	padding: 100px 50px 0;
-}
-
-#container.flipped .blackContainer {
-	align-items: flex-end;
-	padding: 0 0 100px 50px;
+	flex-direction: column;
+	justify-content: flex-end;
+	padding: 0 50px 100px 50px;
 }
 
 .Board {

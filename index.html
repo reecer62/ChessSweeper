@@ -14,9 +14,6 @@
 </head>
 
 <body oncontextmenu="return false">
-	<div class="header">
-		<div id="status"></div>
-	</div>
 	<div id="container">
 		<div class="rules">
 			<h1>ChessSweeper Rules</h1>
@@ -47,8 +44,16 @@
 				</li>
 			</ol>
 		</div>
+		<div id="status"></div>
 		<div id="board"></div>
+		<div class="footer">
+			<div class="buttons">
+				<button id="flipBoard">Flip Board</button>
+				<button id="resetBoard">Reset Board</button>
+			</div>
+		</div>
 		<div class="blackContainer">
+			<button id="claimBlack">Claim Black</button>
 			<div id="blackTimer"></div>
 		</div>
 		<div class="centerContainer">
@@ -57,12 +62,7 @@
 		</div>
 		<div class="whiteContainer">
 			<div id="whiteTimer"></div>
-		</div>
-	</div>
-	<div class="footer">
-		<div class="buttons">
-			<button id="flipBoard">Flip Board</button>
-			<button id="resetBoard">Reset Board</button>
+			<button id="claimWhite">Claim White</button>
 		</div>
 	</div>
 	<script type="module" src="main.js"></script>

@@ -33,6 +33,7 @@ export default class Board {
 		this.gameOver = false;
 		this.currFlags = 0;
 		this.prevPositions = {};
+		this.color = "";
 
 		this.init();
 	}
@@ -42,7 +43,7 @@ export default class Board {
 			return;
 		}
 		let piece = document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Piece"))
-		if (event.button === 0 && piece && this.game.turn() === this.pieceElements.get(piece).color) {
+		if (event.button === 0 && piece && this.game.turn() === this.pieceElements.get(piece).color && this.color === this.game.turn()) {
 			event.preventDefault();
 			this.dragging = true;
 			this.prevSquare = this.squareElements.get(document.elementsFromPoint(event.clientX, event.clientY).find(e => e.classList.contains("Square")));
@@ -290,6 +291,8 @@ export default class Board {
 		this.gameOver = false;
 		this.currFlags = 0;
 		this.flagCounterCB(this.mineCount);
+		this.prevPositions = {};
+		this.color = "";
 		this.game.reset();
 		this.swapTurnsCB({ restart: true });
 		Object.values(this.squares).forEach((square) => {
@@ -335,7 +338,7 @@ export default class Board {
 		}
 	}
 
-	resetMS() {
+	resetMS(mineLocs = []) {
 		Object.values(this.squares).forEach((s) => {
 			s.resetMS();
 		});
@@ -343,18 +346,21 @@ export default class Board {
 		this.currFlags = 0;
 		this.flagCounterCB(this.mineCount);
 
-		let mineLocs = [];
-		while (mineLocs.length < this.mineCount / 2) {
-			let loc = Math.floor(Math.random() * Object.keys(this.squares).length / 2);
-			if (mineLocs.indexOf(loc) === -1) {
-				mineLocs.push(loc);
+		if (mineLocs.length === 0) {
+			while (mineLocs.length < this.mineCount / 2) {
+				let loc = Math.floor(Math.random() * Object.keys(this.squares).length / 2);
+				if (mineLocs.indexOf(loc) === -1) {
+					mineLocs.push(loc);
+				}
 			}
-		}
-		while (mineLocs.length < this.mineCount) {
-			let loc = Math.floor(Math.random() * (Object.keys(this.squares).length - Object.keys(this.squares).length / 2) + Object.keys(this.squares).length / 2);
-			if (mineLocs.indexOf(loc) === -1) {
-				mineLocs.push(loc);
+			while (mineLocs.length < this.mineCount) {
+				let loc = Math.floor(Math.random() * (Object.keys(this.squares).length - Object.keys(this.squares).length / 2) + Object.keys(this.squares).length / 2);
+				if (mineLocs.indexOf(loc) === -1) {
+					mineLocs.push(loc);
+				}
 			}
+		} else {
+			this.mineCount = mineLocs.length;
 		}
 
 		Object.values(this.squares).forEach((s, index) => {
@@ -391,5 +397,39 @@ export default class Board {
 			}
 		});
 		return adj;
+	}
+
+	setFen(fen, mineLocs, gameOver) {
+		this.game.load(fen);
+		this.gameOver = gameOver;
+		this.currFlags = 0;
+		this.color = "";
+
+		this.resetMS(mineLocs);
+		this.game.board().reverse().forEach((rank, ri) => {
+			rank.forEach((square, fi) => {
+				if (square !== null) {
+					let piece = new Piece({ color: square.color, type: square.type, size: this.squareSize });
+					this.squares[`${files[fi]}${ri + 1}`].addPiece(piece.element);
+					this.pieceElements.set(piece.element, piece);
+				}
+			});
+		});
+		if (gameOver) {
+			this.status = "Game has not started yet.";
+		} else {
+			if (this.game.turn() === "w") {
+				this.status = "White to move.";
+			} else {
+				this.status = "Black to move.";
+			}
+		}
+		this.statusCB(this.status);
+	}
+
+	startGame() {
+		this.gameOver = false;
+		this.status = "White to move.";
+		this.statusCB(this.status);
 	}
 }
