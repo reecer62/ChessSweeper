@@ -77,7 +77,12 @@ document.getElementById("serverConnect").onclick = () => {
 
 document.onmousedown = (event) => {
 	board.mouseDown(event);
-	return false;
+	if (event.target.localName === "input") {
+		return true;
+	} else {
+		document.querySelectorAll(":focus").forEach((e) => e.blur());
+		return false;
+	}
 };
 document.onmouseup = (event) => {
 	board.mouseUp(event);
