@@ -69,7 +69,7 @@ network.addOnMessage("moveAll", (data) => {
 	}
 });
 
-network.connect("localhost", 25568); //173.95.165.30
+network.connect(document.getElementById("serverIP").value, document.getElementById("serverPort").value); //173.95.165.30
 document.getElementById("serverConnect").onclick = () => {
 	network.disconnect();
 	network.connect(document.getElementById("serverIP").value, document.getElementById("serverPort").value);
