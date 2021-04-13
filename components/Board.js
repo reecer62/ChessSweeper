@@ -90,7 +90,6 @@ export default class Board {
 							timer: move.color === "b" ? this.blackTimer.getTime() : this.whiteTimer.getTime()
 						}
 					});
-					this.swapTimer();
 				}
 			}
 
@@ -334,6 +333,8 @@ export default class Board {
 
 	move(move, extraInfo) {
 		this.game.move(move);
+		this.swapTimer();
+
 		let prevSquare = this.squares[move.from];
 		let newSquare = this.squares[move.to];
 		let draggedPiece = prevSquare.piece
