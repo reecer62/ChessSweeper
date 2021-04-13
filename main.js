@@ -1,6 +1,5 @@
 import Network from "./components/Network.js";
 import Board from "./components/Board.js";
-import Timer from "./components/Timer.js";
 
 const network = new Network({
 	ip: "localhost",
@@ -11,11 +10,10 @@ const board = new Board({
 	size: "400px",
 	network,
 	statusCB: (text) => document.getElementById("status").innerHTML = text,
-	swapTurnsCB: swapTimer,
 	flagCounterCB: (text) => document.getElementById("flagCounter").innerHTML = text
 });
 
-network.addOnMessage("setFen", (data) => {
+network.addOnMessage("setBoard", (data) => {
 	document.getElementById("claimWhite").disabled = data.whitePlayer;
 	if (data.whitePlayer) {
 		document.getElementById("youAreWhite").innerHTML = "White is claimed.";
@@ -28,29 +26,37 @@ network.addOnMessage("setFen", (data) => {
 	} else {
 		document.getElementById("youAreBlack").innerHTML = "Black is not claimed.";
 	}
-	board.setFen(data.fen, data.mineCount, data.prevMove, !(data.whitePlayer && data.blackPlayer));
+	board.setBoard(data.fen, data.mineCount, data.prevMove, !(data.whitePlayer && data.blackPlayer));
 	document.getElementById("flagCounter").innerHTML = data.mineCount;
 });
 network.addOnMessage("resetBoard", (data) => {
-	board.setFen(data.fen, data.mineCount, data.prevMove, !(data.whitePlayer && data.blackPlayer));
+	board.setBoard(data.fen, data.mineCount, data.prevMove, !(data.whitePlayer && data.blackPlayer));
 	document.getElementById("claimWhite").disabled = false;
 	document.getElementById("claimBlack").disabled = false;
 	document.getElementById("youAreWhite").innerHTML = "White is not claimed.";
 	document.getElementById("youAreBlack").innerHTML = "Black is not claimed.";
 });
 network.addOnMessage("whiteClaimed", (data) => {
-	document.getElementById("claimWhite").disabled = data.taken;
 	if (data.taken) {
 		document.getElementById("youAreWhite").innerHTML = "White is claimed.";
+		document.getElementById("claimWhite").disabled = true;
 	} else {
+		board.setBoard(data.fen, data.mineCount, {}, true, "White");
+		document.getElementById("claimWhite").disabled = false;
+		document.getElementById("claimBlack").disabled = false;
 		document.getElementById("youAreWhite").innerHTML = "White is not claimed.";
+		document.getElementById("youAreBlack").innerHTML = "Black is not claimed.";
 	}
 });
 network.addOnMessage("blackClaimed", (data) => {
-	document.getElementById("claimBlack").disabled = data.taken;
 	if (data.taken) {
 		document.getElementById("youAreBlack").innerHTML = "Black is claimed.";
+		document.getElementById("claimBlack").disabled = true;
 	} else {
+		board.setBoard(data.fen, data.mineCount, {}, true, "Black");
+		document.getElementById("claimWhite").disabled = false;
+		document.getElementById("claimBlack").disabled = false;
+		document.getElementById("youAreWhite").innerHTML = "White is not claimed.";
 		document.getElementById("youAreBlack").innerHTML = "Black is not claimed.";
 	}
 });
@@ -58,41 +64,14 @@ network.addOnMessage("startGame", () => {
 	board.startGame();
 });
 network.addOnMessage("moveAll", (data) => {
-	if (data) {
-		board.move(data);
+	board.setTimers(data.timers);
+	if (data.move) {
+		board.move(data.move, data.extraInfo);
 	} else {
 		board.skipTurn();
 	}
 });
 network.connect();
-
-const whiteTimer = new Timer({
-	selector: "#whiteTimer",
-	duration: 300,
-	increment: 5,
-	flagCB: () => board.flag("w")
-});
-const blackTimer = new Timer({
-	selector: "#blackTimer",
-	duration: 300,
-	increment: 5,
-	flagCB: () => board.flag("b")
-});
-function swapTimer({ color, gameOver = false, restart = false }) {
-	if (gameOver) {
-		whiteTimer.stop(false);
-		blackTimer.stop(false);
-	} else if (restart) {
-		whiteTimer.restart();
-		blackTimer.restart();
-	} else if (color === "w") {
-		blackTimer.stop();
-		whiteTimer.start();
-	} else {
-		whiteTimer.stop();
-		blackTimer.start();
-	}
-}
 
 document.onmousedown = (event) => {
 	board.mouseDown(event);
@@ -114,7 +93,11 @@ document.getElementById("resetBoard").onclick = () => {
 };
 
 document.getElementById("claimWhite").onclick = () => {
-	network.addOnMessage("claimWhite", () => {
+	network.addOnMessage("claimWhite", (data) => {
+		if (data.error) {
+			console.log(error);
+			return;
+		}
 		board.color = "w";
 		document.getElementById("claimWhite").disabled = true;
 		document.getElementById("claimBlack").disabled = true;
@@ -124,7 +107,11 @@ document.getElementById("claimWhite").onclick = () => {
 	network.send({ action: "claimWhite" });
 };
 document.getElementById("claimBlack").onclick = () => {
-	network.addOnMessage("claimBlack", () => {
+	network.addOnMessage("claimBlack", (data) => {
+		if (data.error) {
+			console.log(error);
+			return;
+		}
 		board.color = "b";
 		document.getElementById("claimWhite").disabled = true;
 		document.getElementById("claimBlack").disabled = true;

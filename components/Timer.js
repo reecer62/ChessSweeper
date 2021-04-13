@@ -1,21 +1,21 @@
 export default class Timer {
-	constructor({ selector, duration, increment = 0, flagCB }) {
+	constructor({ selector, flagCB }) {
 		this.element = document.querySelector(selector);
-		this.duration = duration;
-		this.increment = increment;
+		this.duration = 0;
+		this.increment = 0;
 		this.flagCB = flagCB;
 
 		this.element.classList.add("Timer");
-		this.element.textContent = this.parse(this.duration);
-
+		this.element.textContent = this.parse(0);
+		this.currTime = 0;
 		this.startTime = null;
-		this.currTimer = duration;
 
 		this.running = false;
 		this.timeout = null;
 	}
+
 	start() {
-		if (!this.running) {
+		if (!this.running && this.currTime > 0) {
 			this.startTime = Date.now();
 			this.running = true;
 			this.tick();
@@ -25,17 +25,17 @@ export default class Timer {
 	stop(inc = true) {
 		if (this.running) {
 			this.running = false;
-			this.currTimer = this.currTimer - ((Date.now() - this.startTime) / 1000);
+			this.currTime = this.currTime - ((Date.now() - this.startTime) / 1000);
 			if (inc) {
-				this.currTimer += this.increment;
+				this.currTime += this.increment;
 			}
-			this.element.textContent = this.parse(this.currTimer);
+			this.element.textContent = this.parse(this.currTime);
 			clearTimeout(this.timeout);
 		}
 	}
 
 	tick() {
-		let diff = this.currTimer - ((Date.now() - this.startTime) / 1000);
+		let diff = this.currTime - ((Date.now() - this.startTime) / 1000);
 
 		if (diff > 0) {
 			this.timeout = setTimeout(() => this.tick(), 1);
@@ -50,9 +50,24 @@ export default class Timer {
 
 	restart() {
 		this.running = false;
-		this.currTimer = this.duration;
-		this.element.textContent = this.parse(this.currTimer);
+		this.currTime = this.duration;
+		this.element.textContent = this.parse(this.currTime);
 		clearTimeout(this.timeout);
+	}
+
+	setControls(tc) {
+		this.duration = tc[0];
+		this.increment = tc[1];
+		this.element.textContent = this.parse(this.duration);
+		this.currTime = this.duration;
+	}
+
+	getTime() {
+		return this.currTime;
+	}
+
+	setTime(time) {
+		this.currTime = time;
 	}
 
 	parse(seconds) {

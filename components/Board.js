@@ -1,14 +1,14 @@
 import Piece from "./Piece.js";
 import Square from "./Square.js";
+import Timer from "./Timer.js";
 
 const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 export default class Board {
-	constructor({ selector, size, network, statusCB, swapTurnsCB, flagCounterCB }) {
+	constructor({ selector, size, network, statusCB, flagCounterCB }) {
 		this.size = size;
 		this.network = network;
 		this.statusCB = statusCB;
-		this.swapTurnsCB = swapTurnsCB;
 		this.flagCounterCB = flagCounterCB;
 
 		this.element = document.querySelector(selector);
@@ -20,6 +20,23 @@ export default class Board {
 		this.squareElements = new Map(); //dom objects to class objects
 		this.pieceElements = new Map(); //dom objects to class objects
 		this.game = new Chess();
+
+		this.whiteTimer = new Timer({
+			selector: "#whiteTimer",
+			flagCB: () => this.flag("w")
+		});
+		this.blackTimer = new Timer({
+			selector: "#blackTimer",
+			flagCB: () => this.flag("b")
+		});
+		this.network.addOnMessage("getTimer", (data) => {
+			if (data.success) {
+				this.whiteTimer.setControls(data.timeControls);
+				this.blackTimer.setControls(data.timeControls);
+			}
+			this.network.removeOnMessage("getTimer");
+		});
+		this.network.addPreMessage({ action: "getTimer" });
 
 		this.perspective = "w";
 		this.status = "";
@@ -66,21 +83,14 @@ export default class Board {
 					promotion: "q"
 				});
 				if (move !== null) {
-					let fen = this.game.fen();
 					this.game.undo();
-					this.network.addOnMessage("move", (data) => {
-						if (!data.success) {
-							this.game.undo();
-						}
-						this.network.removeOnMessage("move");
-					});
 					this.network.send({
 						action: "move", args: {
 							move,
-							fen
+							timer: move.color === "b" ? this.blackTimer.getTime() : this.whiteTimer.getTime()
 						}
 					});
-					this.move(move);
+					this.swapTimer();
 				}
 			}
 
@@ -134,10 +144,9 @@ export default class Board {
 										square.sink();
 										this.skipTurn();
 									} else {
-										console.log(this.findAdjacentSquares(Object.keys(this.squares).indexOf(square.position)))
-										data.squares.forEach((s) => {
-											this.squares[s.position].sink(s.asset);
-										});
+										for (let [k, v] of Object.entries(data.squares)) {
+											this.squares[k].sink(v);
+										}
 									}
 								}
 								this.network.removeOnMessage("sink");
@@ -145,25 +154,10 @@ export default class Board {
 							this.network.send({
 								action: "sink",
 								args: {
-									square: square.position
+									position: square.position,
+									timer: this.game.turn() === "b" ? this.blackTimer.getTime() : this.whiteTimer.getTime()
 								}
 							});
-							// if (this.mine !== null) {
-							// 	this.skipTurn();
-							// 	this.network.addOnMessage("move", (data) => {
-							// 		if (!data.success) {
-							// 			this.game.undo();
-							// 		}
-							// 		this.network.removeOnMessage("move");
-							// 	});
-							// 	this.network.send({
-							// 		action: "move",
-							// 		args: {
-							// 			skip: true,
-							// 			fen: this.game.fen()
-							// 		}
-							// 	});
-							// }
 						}
 					} else if (event.button === 2) {
 						if (square.flag !== null) {
@@ -190,8 +184,7 @@ export default class Board {
 		}
 
 		this.squareSize = Object.values(this.squares)[0].size;
-
-		// this.setBoard();
+		this.setLabels();
 	}
 
 	skipTurn() {
@@ -203,9 +196,8 @@ export default class Board {
 		}
 		if (this.game.in_check()) {
 			this.status = `Game over, ${moveColor} blew up while in check!`;
-			this.disableClicks();
 			this.gameOver = true;
-			this.swapTurnsCB({ color: this.game.turn(), gameOver: this.gameOver });
+			this.swapTimer();
 		} else {
 			this.status = `${moveColor} blew up! ${notMoveColor} to move.`;
 			this.swapTurn();
@@ -218,7 +210,7 @@ export default class Board {
 		tokens[1] = this.game.turn() === "b" ? "w" : "b";
 		tokens[3] = "-";
 		this.game.load(tokens.join(" "));
-		this.swapTurnsCB({ color: this.game.turn() });
+		this.swapTimer();
 	}
 
 	flag(color) {
@@ -227,7 +219,6 @@ export default class Board {
 			moveColor = "Black";
 		}
 		this.status = `Game over, ${moveColor} flagged.`;
-		this.disableClicks();
 		this.gameOver = true;
 		this.statusCB(this.status);
 	}
@@ -240,142 +231,85 @@ export default class Board {
 		this.setLabels();
 	}
 
-	// resetBoard() {
-	// 	this.gameOver = false;
-	// 	this.currFlags = 0;
-	// 	this.flagCounterCB(this.mineCount);
-	// 	this.prevPositions = {};
-	// 	this.color = "";
-	// 	this.game.reset();
-	// 	this.swapTurnsCB({ restart: true });
-	// 	Object.values(this.squares).forEach((square) => {
-	// 		square.clear();
-	// 	});
-	// 	if (Object.keys(this.prevMove).length !== 0) {
-	// 		this.squares[this.prevMove.from].element.classList.remove("highlighted");
-	// 		this.squares[this.prevMove.to].element.classList.remove("highlighted");
-	// 		this.prevMove = {};
-	// 	}
-	// 	this.setBoard();
-	// }
-
-	// setBoard() {
-	// 	this.setLabels();
-	// 	this.resetMS();
-	// 	this.game.board().reverse().forEach((rank, ri) => {
-	// 		rank.forEach((square, fi) => {
-	// 			if (square !== null) {
-	// 				let piece = new Piece({ color: square.color, type: square.type, size: this.squareSize });
-	// 				this.squares[`${files[fi]}${ri + 1}`].addPiece(piece.element);
-	// 				this.pieceElements.set(piece.element, piece);
-	// 			}
-	// 		});
-	// 	});
-	// 	this.status = "White to move.";
-	// 	this.statusCB(this.status);
-	// }
-
 	setLabels() {
 		if (this.perspective === "w") {
-			Object.values(this.squares).forEach((s) => {
+			for (const s of Object.values(this.squares)) {
 				let labelRank = s.position.charAt(0) === "a";
 				let labelFile = s.position.charAt(1) === "1";
 				s.setLabels(labelRank, labelFile);
-			});
+			}
 		} else {
-			Object.values(this.squares).forEach((s) => {
+			for (const s of Object.values(this.squares)) {
 				let labelRank = s.position.charAt(0) === "h";
 				let labelFile = s.position.charAt(1) === "8";
 				s.setLabels(labelRank, labelFile);
-			});
+			}
 		}
 	}
 
 	resetMS() {
-		Object.values(this.squares).forEach((s) => {
+		for (const s of Object.values(this.squares)) {
 			s.resetMS();
-		});
+		}
 
 		this.currFlags = 0;
 		this.flagCounterCB(this.mineCount);
-
-		// if (mineLocs.length === 0) {
-		// 	while (mineLocs.length < this.mineCount / 2) {
-		// 		let loc = Math.floor(Math.random() * Object.keys(this.squares).length / 2);
-		// 		if (mineLocs.indexOf(loc) === -1) {
-		// 			mineLocs.push(loc);
-		// 		}
-		// 	}
-		// 	while (mineLocs.length < this.mineCount) {
-		// 		let loc = Math.floor(Math.random() * (Object.keys(this.squares).length - Object.keys(this.squares).length / 2) + Object.keys(this.squares).length / 2);
-		// 		if (mineLocs.indexOf(loc) === -1) {
-		// 			mineLocs.push(loc);
-		// 		}
-		// 	}
-		// } else {
-		// 	this.mineCount = mineLocs.length;
-		// }
-
-		// Object.values(this.squares).forEach((s, index) => {
-		// 	if (mineLocs.indexOf(index) !== -1) {
-		// 		s.addMine();
-		// 		this.findAdjacentSquares(index).forEach((ss) => {
-		// 			ss.addAdjacentMine();
-		// 		});
-		// 	}
-		// });
 	}
 
-	// disableClicks() {
-	// 	Object.values(this.squares).forEach((s) => {
-	// 		s.disableClicks();
-	// 	});
-	// }
-
-	findAdjacentSquares(index) {
-		let adj = [];
-		[-9, -7, 7, 9].forEach((i) => {
-			if (index + i >= 0 && index + i < 64 && Math.abs(Math.floor((index + i) / 8) - Math.floor(index / 8)) === 1 && Math.abs((index + i) % 8 - index % 8) === 1) { //row and column distance is 1
-				adj.push(this.squares[`${files[(index + i) % 8]}${8 - Math.floor((index + i) / 8)}`]);
-			}
-		});
-		[-8, 8].forEach((i) => {
-			if (index + i >= 0 && index + i < 64 && Math.abs(Math.floor((index + i) / 8) - Math.floor(index / 8)) === 1 && Math.abs((index + i) % 8 - index % 8) === 0) { //row distance is 1, column distance is 0
-				adj.push(this.squares[`${files[(index + i) % 8]}${8 - Math.floor((index + i) / 8)}`]);
-			}
-		});
-		[-1, 1].forEach((i) => {
-			if (index + i >= 0 && index + i < 64 && Math.abs(Math.floor((index + i) / 8) - Math.floor(index / 8)) === 0 && Math.abs((index + i) % 8 - index % 8) === 1) { //row distance is 0, column distance is 1
-				adj.push(this.squares[`${files[(index + i) % 8]}${8 - Math.floor((index + i) / 8)}`]);
-			}
-		});
-		return adj;
+	swapTimer() {
+		if (this.gameOver) {
+			this.whiteTimer.stop(false);
+			this.blackTimer.stop(false);
+		} else if (this.game.turn() === "w") {
+			this.blackTimer.stop();
+			this.whiteTimer.start();
+		} else {
+			this.whiteTimer.stop();
+			this.blackTimer.start();
+		}
 	}
 
-	setFen(fen, mineCount, prevMove, gameOver) {
+	setTimers(timers) {
+		this.whiteTimer.setTime(timers.whiteTimer);
+		this.blackTimer.setTime(timers.blackTimer);
+	}
+
+	setBoard(fen, mineCount, prevMove, gameOver, disconnect = "") {
 		this.game.load(fen);
 		this.mineCount = mineCount;
 		this.gameOver = gameOver;
-		this.currFlags = 0;
+		this.prevPositions = {};
 		this.color = "";
-
+		this.whiteTimer.restart();
+		this.blackTimer.restart();
 		this.resetMS();
+		this.pieceElements = new Map();
+
 		this.game.board().reverse().forEach((rank, ri) => {
 			rank.forEach((square, fi) => {
 				if (square !== null) {
 					let piece = new Piece({ color: square.color, type: square.type, size: this.squareSize });
 					this.squares[`${files[fi]}${ri + 1}`].addPiece(piece.element);
 					this.pieceElements.set(piece.element, piece);
+				} else {
+					this.squares[`${files[fi]}${ri + 1}`].removePiece();
 				}
 			});
 		});
+		if (Object.keys(this.prevMove).length !== 0) {
+			this.squares[this.prevMove.from].element.classList.remove("highlighted");
+			this.squares[this.prevMove.to].element.classList.remove("highlighted");
+			this.prevMove = {};
+		}
 		if (Object.keys(prevMove).length !== 0) {
 			this.squares[prevMove.from].element.classList.add("highlighted");
 			this.squares[prevMove.to].element.classList.add("highlighted");
 			this.prevMove = prevMove;
 		}
 
-		if (gameOver) {
+		if (disconnect) {
+			this.status = `${disconnect} disconnected!`;
+		} else if (gameOver) {
 			this.status = "Game has not started yet.";
 		} else {
 			if (this.game.turn() === "w") {
@@ -398,7 +332,7 @@ export default class Board {
 		this.statusCB(this.status);
 	}
 
-	move(move) {
+	move(move, extraInfo) {
 		this.game.move(move);
 		let prevSquare = this.squares[move.from];
 		let newSquare = this.squares[move.to];
@@ -418,7 +352,7 @@ export default class Board {
 			let rank = move.color === "b" ? "8" : "1";
 			let rook = this.squares[`h${rank}`].getPiece();
 			this.squares[`h${rank}`].removePiece();
-			if (!this.squares[`f${rank}`].hasMine()) {
+			if (!extraInfo.kcMine) {
 				this.squares[`f${rank}`].addPiece(rook);
 			}
 		}
@@ -426,7 +360,7 @@ export default class Board {
 			let rank = move.color === "b" ? "8" : "1";
 			let rook = this.squares[`a${rank}`].getPiece();
 			this.squares[`a${rank}`].removePiece();
-			if (!this.squares[`d${rank}`].hasMine()) {
+			if (!extraInfo.qcMine) {
 				this.squares[`d${rank}`].addPiece(rook);
 			}
 		}
@@ -436,7 +370,7 @@ export default class Board {
 			this.squares[`${file}${rank}`].removePiece();
 		}
 		prevSquare.removePiece();
-		if (newSquare.hasMine()) {
+		if (extraInfo.mine) {
 			this.game.remove(newSquare.position);
 			let tokens = this.game.fen().split(" ");
 			tokens[3] = "-";
@@ -448,7 +382,6 @@ export default class Board {
 				} else {
 					this.status = "Game over, White's king blew up!";
 				}
-				this.disableClicks();
 				this.gameOver = true;
 			} else {
 				this.swapTurn();
@@ -458,18 +391,15 @@ export default class Board {
 					} else {
 						this.status = "Game over, White blew up a piece while in check!";
 					}
-					this.disableClicks();
 					this.gameOver = true;
-				} else {
-					this.resetMS();
 				}
 				this.swapTurn();
 			}
 		} else {
-			if ("captured" in move) {
-				this.resetMS();
-			}
 			newSquare.addPiece(draggedPiece);
+		}
+		if (extraInfo.resetMS) {
+			this.resetMS();
 		}
 
 		let fen = this.game.fen().split(" ");
@@ -489,15 +419,12 @@ export default class Board {
 			}
 			if (this.game.in_checkmate()) {
 				this.status = `Game over, ${moveColor} is in checkmate.`;
-				this.disableClicks();
 				this.gameOver = true;
 			} else if (this.game.insufficient_material()) {
 				this.status = "Game over, insufficient material.";
-				this.disableClicks();
 				this.gameOver = true;
 			} else if (this.game.in_stalemate()) {
 				this.status = "Game over, stalemate position.";
-				this.disableClicks();
 				this.gameOver = true;
 			} else {
 				this.status = `${moveColor} to move.`;
@@ -505,16 +432,14 @@ export default class Board {
 					this.status += ` ${moveColor} is in check.`;
 				}
 
-				Object.values(this.prevPositions).forEach((v) => {
+				for (const v of Object.values(this.prevPositions)) {
 					if (v >= 3) {
 						this.status = "Game over, threefold repetition rule.";
-						this.disableClicks();
 						this.gameOver = true;
 					}
-				});
+				}
 			}
 		}
-		this.swapTurnsCB({ color: this.game.turn(), gameOver: this.gameOver });
 		this.statusCB(this.status);
 	}
 }

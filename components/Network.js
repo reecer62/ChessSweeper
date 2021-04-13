@@ -7,6 +7,7 @@ export default class Network {
 		this.ws = null;
 		// this.retry = 2000;
 		this.onMessage = {};
+		this.preMessages = [];
 	}
 
 	connect() {
@@ -45,6 +46,11 @@ export default class Network {
 				console.log(`NO HANDLER: ${JSON.stringify(data)}`);
 			}
 		};
+
+		for (const msg of this.preMessages) {
+			this.send(msg);
+		}
+		this.preMessages = [];
 	}
 
 	disconnect() {
@@ -58,6 +64,10 @@ export default class Network {
 
 	removeOnMessage(action) {
 		delete this.onMessage[action];
+	}
+
+	addPreMessage(message) {
+		this.preMessages.push(message);
 	}
 
 	send(message, numTries = 10) {

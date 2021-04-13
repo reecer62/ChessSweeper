@@ -134,14 +134,16 @@ export default class Square {
 	}
 
 	sink(asset) {
-		this.element.classList.remove("raised");
-		this.element.classList.add("sunken");
-		this.msStatus = "sunken";
-		if (asset) {
-			this.asset = document.createElement("img");
-			this.asset.setAttribute("src", `assets/minesweeper/${asset}.svg`);
-			this.displayChild(this.asset);
-			this.element.appendChild(this.asset);
+		if (this.msStatus === "raised") {
+			this.element.classList.remove("raised");
+			this.element.classList.add("sunken");
+			this.msStatus = "sunken";
+			if (asset) {
+				this.asset = document.createElement("img");
+				this.asset.setAttribute("src", `assets/minesweeper/${asset}.svg`);
+				this.displayChild(this.asset);
+				this.element.appendChild(this.asset);
+			}
 		}
 	}
 

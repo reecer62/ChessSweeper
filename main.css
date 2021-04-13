@@ -9,6 +9,7 @@ body {
 	flex-direction: column;
 	justify-content: center;
 	align-items: stretch;
+	cursor: default;
 }
 
 #container {
