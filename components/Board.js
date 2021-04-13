@@ -29,14 +29,6 @@ export default class Board {
 			selector: "#blackTimer",
 			flagCB: () => this.flag("b")
 		});
-		this.network.addOnMessage("getTimer", (data) => {
-			if (data.success) {
-				this.whiteTimer.setControls(data.timeControls);
-				this.blackTimer.setControls(data.timeControls);
-			}
-			this.network.removeOnMessage("getTimer");
-		});
-		this.network.addPreMessage({ action: "getTimer" });
 
 		this.perspective = "w";
 		this.status = "";
@@ -277,10 +269,19 @@ export default class Board {
 		this.game.load(fen);
 		this.mineCount = mineCount;
 		this.gameOver = gameOver;
-		this.prevPositions = {};
-		this.color = "";
+
 		this.whiteTimer.restart();
 		this.blackTimer.restart();
+		this.network.addOnMessage("getControls", (data) => {
+			if (data.success) {
+				this.whiteTimer.setControls(data.timeControls);
+				this.blackTimer.setControls(data.timeControls);
+			}
+			this.network.removeOnMessage("getControls");
+		});
+		this.network.send({ action: "getControls" });
+		this.prevPositions = {};
+		this.color = "";
 		this.resetMS();
 		this.pieceElements = new Map();
 

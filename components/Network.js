@@ -1,18 +1,14 @@
 export default class Network {
-	constructor({ ip, port }) {
-		this.ip = ip;
-		this.port = port;
-
-		this.reconnect = true;
+	constructor() {
+		// this.reconnect = true;
 		this.ws = null;
 		// this.retry = 2000;
 		this.onMessage = {};
-		this.preMessages = [];
 	}
 
-	connect() {
-		this.reconnect = true;
-		this.ws = new WebSocket(`ws://${this.ip}:${this.port}`);
+	connect(ip, port) {
+		// this.reconnect = true;
+		this.ws = new WebSocket(`ws://${ip}:${port}`);
 
 		this.ws.onopen = () => {
 			// this.retry = 2000;
@@ -25,7 +21,7 @@ export default class Network {
 		// 		console.log("Retrying connection in", this.retry / 1000, "seconds...");
 		// 		window.setTimeout(() => {
 		// 			this.retry = Math.min(this.retry * 2, 30000);
-		// 			this.connect();
+		// 			this.connect(ip, port);
 		// 		}, this.retry);
 		// 	}
 		// };
@@ -46,15 +42,11 @@ export default class Network {
 				console.log(`NO HANDLER: ${JSON.stringify(data)}`);
 			}
 		};
-
-		for (const msg of this.preMessages) {
-			this.send(msg);
-		}
-		this.preMessages = [];
 	}
 
 	disconnect() {
-		this.reconnect = false;
+		// this.reconnect = false;
+		this.ws.close();
 		this.ws = null;
 	}
 
@@ -64,10 +56,6 @@ export default class Network {
 
 	removeOnMessage(action) {
 		delete this.onMessage[action];
-	}
-
-	addPreMessage(message) {
-		this.preMessages.push(message);
 	}
 
 	send(message, numTries = 10) {

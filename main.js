@@ -1,10 +1,7 @@
 import Network from "./components/Network.js";
 import Board from "./components/Board.js";
 
-const network = new Network({
-	ip: "localhost",
-	port: "25568"
-}); //173.95.165.30
+const network = new Network();
 const board = new Board({
 	selector: "#board",
 	size: "400px",
@@ -71,7 +68,12 @@ network.addOnMessage("moveAll", (data) => {
 		board.skipTurn();
 	}
 });
-network.connect();
+
+network.connect("localhost", 25568); //173.95.165.30
+document.getElementById("serverConnect").onclick = () => {
+	network.disconnect();
+	network.connect(document.getElementById("serverIP").value, document.getElementById("serverPort").value);
+};
 
 document.onmousedown = (event) => {
 	board.mouseDown(event);
