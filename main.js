@@ -75,6 +75,11 @@ document.getElementById("serverConnect").onclick = () => {
 	network.disconnect();
 	network.connect(document.getElementById("serverIP").value, document.getElementById("serverPort").value);
 };
+document.getElementById("serverSettings").onsubmit = (event) => {
+	event.preventDefault();
+	network.disconnect();
+	network.connect(document.getElementById("serverIP").value, document.getElementById("serverPort").value);
+}
 
 document.onmousedown = (event) => {
 	board.mouseDown(event);

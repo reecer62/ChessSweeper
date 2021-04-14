@@ -45,7 +45,7 @@ body {
 	flex-direction: column-reverse;
 }
 
-.serverSettings {
+#serverSettings {
 	grid-area: server;
 	display: flex;
 	justify-content: space-around;
@@ -54,14 +54,14 @@ body {
 	margin: 10px;
 }
 
-.serverSettings div {
+#serverSettings div {
 	display: flex;
 	align-items: center;
 	padding-right: 5px;
 }
 
-.serverSettings input {
-	width: 150px;
+#serverSettings input {
+	width: 135px;
 }
 
 #status {
@@ -99,7 +99,7 @@ body {
 }
 
 .rulesBody {
-	margin: 0 50px 0 15px;
+	margin: 0 35px 0 15px;
 }
 
 .rulesBody li {

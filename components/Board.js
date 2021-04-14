@@ -132,8 +132,10 @@ export default class Board {
 						if (square.flag === null) {
 							this.network.addOnMessage("sink", (data) => {
 								if (data.success) {
-									for (let [k, v] of Object.entries(data.squares)) {
-										this.squares[k].sink(v);
+									if (data.reveal) {
+										for (let [k, v] of Object.entries(data.squares)) {
+											this.squares[k].sink(v);
+										}
 									}
 								}
 								this.network.removeOnMessage("sink");

@@ -15,7 +15,7 @@
 
 <body oncontextmenu="return false">
 	<div id="container">
-		<div class="serverSettings">
+		<form id="serverSettings">
 			<div>
 				<div>IP: </div>
 				<input id="serverIP" value="localhost">
@@ -25,7 +25,7 @@
 				<input id="serverPort" value="25568">
 			</div>
 			<button id="serverConnect">Connect</button>
-		</div>
+		</form>
 		<div class="rules">
 			<h1>ChessSweeper Rules</h1>
 			<ol class="rulesBody">
@@ -45,13 +45,19 @@
 					</li>
 				</ul>
 				<li>
-					<p>If you reveal a bomb, you lose your turn</p>
+					<p>After every 10 moves, the Minesweeper board resets</p>
 				</li>
 				<li>
-					<p>If you place a piece on a bomb, you lose that piece</p>
+					<p>If you reveal a mine, you lose your turn</p>
 				</li>
+				<ul>
+					<li>
+						<p>If you a reveal a mine the first time you clear a square after a reset, you don't lose your
+							turn</p>
+					</li>
+				</ul>
 				<li>
-					<p>Every 10 moves, the Minesweeper board resets</p>
+					<p>If you place a piece on a mine, you lose that piece</p>
 				</li>
 			</ol>
 		</div>
