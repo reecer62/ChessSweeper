@@ -5,11 +5,12 @@ import Timer from "./Timer.js";
 const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 export default class Board {
-	constructor({ selector, size, network, statusCB, flagCounterCB }) {
+	constructor({ selector, size, network, statusCB, flagCounterCB, turnCounterCB }) {
 		this.size = size;
 		this.network = network;
 		this.statusCB = statusCB;
 		this.flagCounterCB = flagCounterCB;
+		this.turnCounterCB = turnCounterCB;
 
 		this.element = document.querySelector(selector);
 		this.element.classList.add("Board");
@@ -131,13 +132,8 @@ export default class Board {
 						if (square.flag === null) {
 							this.network.addOnMessage("sink", (data) => {
 								if (data.success) {
-									if (data.mine) {
-										square.sink();
-										this.skipTurn();
-									} else {
-										for (let [k, v] of Object.entries(data.squares)) {
-											this.squares[k].sink(v);
-										}
+									for (let [k, v] of Object.entries(data.squares)) {
+										this.squares[k].sink(v);
 									}
 								}
 								this.network.removeOnMessage("sink");
@@ -178,21 +174,33 @@ export default class Board {
 		this.setLabels();
 	}
 
-	skipTurn() {
+	skipTurn(extraInfo) {
+		if (Object.keys(this.prevMove).length !== 0) {
+			this.squares[this.prevMove.from].element.classList.remove("highlighted");
+			this.squares[this.prevMove.to].element.classList.remove("highlighted");
+			this.prevMove = {};
+		}
+
 		let moveColor = "White";
 		let notMoveColor = "Black";
 		if (this.game.turn() === "b") {
 			moveColor = "Black";
 			notMoveColor = "White";
 		}
+
 		if (this.game.in_check()) {
 			this.status = `Game over, ${moveColor} blew up while in check!`;
 			this.gameOver = true;
 			this.swapTimer();
 		} else {
+			if (extraInfo.resetMS) {
+				this.resetMS();
+			}
 			this.status = `${moveColor} blew up! ${notMoveColor} to move.`;
 			this.swapTurn();
 		}
+
+		this.turnCounterCB(extraInfo.turnCount);
 		this.statusCB(this.status);
 	}
 
@@ -334,7 +342,6 @@ export default class Board {
 
 	move(move, extraInfo) {
 		this.game.move(move);
-		this.swapTimer();
 
 		let prevSquare = this.squares[move.from];
 		let newSquare = this.squares[move.to];
@@ -356,6 +363,8 @@ export default class Board {
 			this.squares[`h${rank}`].removePiece();
 			if (!extraInfo.kcMine) {
 				this.squares[`f${rank}`].addPiece(rook);
+			} else {
+				this.squares[`f${rank}`].sink("mine");
 			}
 		}
 		if (move.flags.includes("q")) { //queenside castle
@@ -364,6 +373,8 @@ export default class Board {
 			this.squares[`a${rank}`].removePiece();
 			if (!extraInfo.qcMine) {
 				this.squares[`d${rank}`].addPiece(rook);
+			} else {
+				this.squares[`d${rank}`].sink("mine");
 			}
 		}
 		if (move.flags.includes("e")) { //en passant
@@ -378,6 +389,7 @@ export default class Board {
 			tokens[3] = "-";
 			this.game.load(tokens.join(" "));
 			newSquare.removePiece();
+			newSquare.sink("mine");
 			if (move.piece === "k") {
 				if (move.color === "b") {
 					this.status = "Game over, Black's king blew up!";
@@ -442,6 +454,9 @@ export default class Board {
 				}
 			}
 		}
+
+		this.swapTimer();
+		this.turnCounterCB(extraInfo.turnCount);
 		this.statusCB(this.status);
 	}
 }

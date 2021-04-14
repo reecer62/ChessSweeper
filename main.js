@@ -7,7 +7,8 @@ const board = new Board({
 	size: "400px",
 	network,
 	statusCB: (text) => document.getElementById("status").innerHTML = text,
-	flagCounterCB: (text) => document.getElementById("flagCounter").innerHTML = text
+	flagCounterCB: (text) => document.getElementById("flagCounter").innerHTML = text,
+	turnCounterCB: (text) => document.getElementById("turnCounter").innerHTML = `Move ${text}`
 });
 
 network.addOnMessage("setBoard", (data) => {
@@ -65,7 +66,7 @@ network.addOnMessage("moveAll", (data) => {
 	if (data.move) {
 		board.move(data.move, data.extraInfo);
 	} else {
-		board.skipTurn();
+		board.skipTurn(data.extraInfo);
 	}
 });
 
