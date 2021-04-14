@@ -1,18 +1,19 @@
 import Piece from "./Piece.js";
 import Square from "./Square.js";
+import Taken from "./Taken.js";
 import Timer from "./Timer.js";
 
 const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 export default class Board {
-	constructor({ selector, size, network, statusCB, flagCounterCB, turnCounterCB }) {
+	constructor({ id, size, network, statusCB, flagCounterCB, turnCounterCB }) {
 		this.size = size;
 		this.network = network;
 		this.statusCB = statusCB;
 		this.flagCounterCB = flagCounterCB;
 		this.turnCounterCB = turnCounterCB;
 
-		this.element = document.querySelector(selector);
+		this.element = document.getElementById(id);
 		this.element.classList.add("Board");
 		this.element.style.width = this.size;
 		this.element.style.height = this.size;
@@ -23,12 +24,20 @@ export default class Board {
 		this.game = new Chess();
 
 		this.whiteTimer = new Timer({
-			selector: "#whiteTimer",
+			id: "whiteTimer",
 			flagCB: () => this.flag("w")
 		});
 		this.blackTimer = new Timer({
-			selector: "#blackTimer",
+			id: "blackTimer",
 			flagCB: () => this.flag("b")
+		});
+		this.whiteTaken = new Taken({
+			id: "whiteTaken",
+			color: "b"
+		});
+		this.blackTaken = new Taken({
+			id: "blackTaken",
+			color: "w"
 		});
 
 		this.perspective = "w";
@@ -173,6 +182,8 @@ export default class Board {
 		}
 
 		this.squareSize = Object.values(this.squares)[0].size;
+		this.whiteTaken.setSize(this.squareSize);
+		this.blackTaken.setSize(this.squareSize);
 		this.setLabels();
 	}
 
@@ -295,9 +306,30 @@ export default class Board {
 		this.resetMS();
 		this.pieceElements = new Map();
 
+		this.whiteTaken.clear();
+		this.blackTaken.clear();
+		let pieces = {
+			w: {
+				p: 8,
+				b: 2,
+				n: 2,
+				r: 2,
+				q: 1,
+				k: 1
+			},
+			b: {
+				p: 8,
+				b: 2,
+				n: 2,
+				r: 2,
+				q: 1,
+				k: 1
+			}
+		};
 		this.game.board().reverse().forEach((rank, ri) => {
 			rank.forEach((square, fi) => {
 				if (square !== null) {
+					pieces[square.color][square.type]--;
 					let piece = new Piece({ color: square.color, type: square.type, size: this.squareSize });
 					this.squares[`${files[fi]}${ri + 1}`].addPiece(piece.element);
 					this.pieceElements.set(piece.element, piece);
@@ -306,6 +338,17 @@ export default class Board {
 				}
 			});
 		});
+		for (const [k, v] of Object.entries(pieces.w)) {
+			for (let i = v; v > 0; v--) {
+				this.whiteTaken.add(k);
+			}
+		}
+		for (const [k, v] of Object.entries(pieces.b)) {
+			for (let i = v; v > 0; v--) {
+				this.blackTaken.add(k);
+			}
+		}
+
 		if (Object.keys(this.prevMove).length !== 0) {
 			this.squares[this.prevMove.from].element.classList.remove("highlighted");
 			this.squares[this.prevMove.to].element.classList.remove("highlighted");
@@ -367,6 +410,11 @@ export default class Board {
 				this.squares[`f${rank}`].addPiece(rook);
 			} else {
 				this.squares[`f${rank}`].sink("mine");
+				if (move.color === "b") {
+					this.whiteTaken.add("r");
+				} else {
+					this.blackTaken.add("r");
+				}
 			}
 		}
 		if (move.flags.includes("q")) { //queenside castle
@@ -377,12 +425,22 @@ export default class Board {
 				this.squares[`d${rank}`].addPiece(rook);
 			} else {
 				this.squares[`d${rank}`].sink("mine");
+				if (move.color === "b") {
+					this.whiteTaken.add("r");
+				} else {
+					this.blackTaken.add("r");
+				}
 			}
 		}
 		if (move.flags.includes("e")) { //en passant
 			let rank = parseInt(move.to.charAt(1)) + (move.color === "b" ? 1 : -1);
 			let file = move.to.charAt(0);
 			this.squares[`${file}${rank}`].removePiece();
+			if (move.color === "w") {
+				this.whiteTaken.add("p");
+			} else {
+				this.blackTaken.add("p");
+			}
 		}
 		prevSquare.removePiece();
 		if (extraInfo.mine) {
@@ -390,7 +448,14 @@ export default class Board {
 			let tokens = this.game.fen().split(" ");
 			tokens[3] = "-";
 			this.game.load(tokens.join(" "));
-			newSquare.removePiece();
+			if (newSquare.hasPiece()) {
+				newSquare.removePiece();
+				if (move.color === "w") {
+					this.whiteTaken.add(this.pieceElements.get(newSquare.piece).type);
+				} else {
+					this.blackTaken.add(this.pieceElements.get(newSquare.piece).type);
+				}
+			}
 			newSquare.sink("mine");
 			if (move.piece === "k") {
 				if (move.color === "b") {
@@ -408,10 +473,23 @@ export default class Board {
 						this.status = "Game over, White blew up a piece while in check!";
 					}
 					this.gameOver = true;
+				} else {
+					if (move.color === "b") {
+						this.whiteTaken.add(this.pieceElements.get(draggedPiece).type);
+					} else {
+						this.blackTaken.add(this.pieceElements.get(draggedPiece).type);
+					}
 				}
 				this.swapTurn();
 			}
 		} else {
+			if (newSquare.hasPiece()) {
+				if (move.color === "w") {
+					this.whiteTaken.add(this.pieceElements.get(newSquare.piece).type);
+				} else {
+					this.blackTaken.add(this.pieceElements.get(newSquare.piece).type);
+				}
+			}
 			newSquare.addPiece(draggedPiece);
 		}
 		if (extraInfo.resetMS) {

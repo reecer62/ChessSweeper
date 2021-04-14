@@ -3,7 +3,7 @@ import Board from "./components/Board.js";
 
 const network = new Network(() => document.getElementById("serverStatus").innerHTML = "Connected", () => document.getElementById("serverStatus").innerHTML = "Disconnected");
 const board = new Board({
-	selector: "#board",
+	id: "board",
 	size: "400px",
 	network,
 	statusCB: (text) => document.getElementById("status").innerHTML = text,
@@ -115,6 +115,10 @@ document.getElementById("claimWhite").onclick = () => {
 			return;
 		}
 		board.color = "w";
+		if (board.perspective !== "w") {
+			document.getElementById("container").classList.toggle("flipped");
+			board.flipBoard();
+		}
 		document.getElementById("claimWhite").disabled = true;
 		document.getElementById("claimBlack").disabled = true;
 		document.getElementById("youAreWhite").innerHTML = "You are White.";
@@ -129,6 +133,10 @@ document.getElementById("claimBlack").onclick = () => {
 			return;
 		}
 		board.color = "b";
+		if (board.perspective !== "b") {
+			document.getElementById("container").classList.toggle("flipped");
+			board.flipBoard();
+		}
 		document.getElementById("claimWhite").disabled = true;
 		document.getElementById("claimBlack").disabled = true;
 		document.getElementById("youAreBlack").innerHTML = "You are Black."

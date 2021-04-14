@@ -1,6 +1,6 @@
 export default class Timer {
-	constructor({ selector, flagCB }) {
-		this.element = document.querySelector(selector);
+	constructor({ id, flagCB }) {
+		this.element = document.getElementById(id);
 		this.duration = 0;
 		this.increment = 0;
 		this.flagCB = flagCB;
