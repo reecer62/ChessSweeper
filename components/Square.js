@@ -40,6 +40,9 @@ export default class Square {
 		if (this.flag !== null) {
 			this.displayChild(this.flag);
 		}
+		if (this.asset !== null) {
+			this.displayChild(this.asset);
+		}
 	}
 
 	removePiece() {
@@ -49,6 +52,9 @@ export default class Square {
 		}
 		if (this.flag !== null) {
 			this.displayChild(this.flag);
+		}
+		if (this.asset !== null) {
+			this.displayChild(this.asset);
 		}
 	}
 

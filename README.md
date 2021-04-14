@@ -2,8 +2,6 @@
 
 Server code located at [ChessSweeperServer](https://github.com/emori1248/ChessSweeperServer).
 
-Running demo located [here](https://rollinc2198.github.io/ChessSweeper/).
-
 To run this locally, it has to be hosted on a webserver. I recommend [NGINX](https://nginx.org/en/download.html).
 
 Steps:
