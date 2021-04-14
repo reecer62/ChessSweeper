@@ -1,7 +1,7 @@
 import Network from "./components/Network.js";
 import Board from "./components/Board.js";
 
-const network = new Network();
+const network = new Network(() => document.getElementById("serverStatus").innerHTML = "Connected", () => document.getElementById("serverStatus").innerHTML = "Disconnected");
 const board = new Board({
 	selector: "#board",
 	size: "400px",
@@ -75,10 +75,13 @@ document.getElementById("serverConnect").onclick = () => {
 	network.disconnect();
 	network.connect(document.getElementById("serverIP").value, document.getElementById("serverPort").value);
 };
-document.getElementById("serverSettings").onsubmit = (event) => {
+document.getElementById("connectForm").onsubmit = (event) => {
 	event.preventDefault();
 	network.disconnect();
 	network.connect(document.getElementById("serverIP").value, document.getElementById("serverPort").value);
+}
+document.getElementById("serverDisconnect").onclick = () => {
+	network.disconnect();
 }
 
 document.onmousedown = (event) => {

@@ -1,7 +1,9 @@
 export default class Network {
-	constructor() {
-		// this.reconnect = true;
+	constructor(onOpen, onClose) {
+		this.onOpen = onOpen;
+		this.onClose = onClose;
 		this.ws = null;
+		// this.reconnect = true;
 		// this.retry = 2000;
 		this.onMessage = {};
 	}
@@ -13,18 +15,20 @@ export default class Network {
 		this.ws.onopen = () => {
 			// this.retry = 2000;
 			console.log("Aaaaaaaaaaaaaaaaannnddddddddddd... OPEN!");
+			this.onOpen();
 		};
 
-		// this.ws.onclose = () => {
-		// 	console.log("Connection closed")
-		// 	if (this.reconnect) {
-		// 		console.log("Retrying connection in", this.retry / 1000, "seconds...");
-		// 		window.setTimeout(() => {
-		// 			this.retry = Math.min(this.retry * 2, 30000);
-		// 			this.connect(ip, port);
-		// 		}, this.retry);
-		// 	}
-		// };
+		this.ws.onclose = () => {
+			// 	console.log("Connection closed")
+			// 	if (this.reconnect) {
+			// 		console.log("Retrying connection in", this.retry / 1000, "seconds...");
+			// 		window.setTimeout(() => {
+			// 			this.retry = Math.min(this.retry * 2, 30000);
+			// 			this.connect(ip, port);
+			// 		}, this.retry);
+			// 	}
+			this.onClose();
+		};
 
 		this.ws.onmessage = (event) => {
 			let data = JSON.parse(event.data);
@@ -46,8 +50,10 @@ export default class Network {
 
 	disconnect() {
 		// this.reconnect = false;
-		this.ws.close();
-		this.ws = null;
+		if (this.ws) {
+			this.ws.close();
+			this.ws = null;
+		}
 	}
 
 	addOnMessage(action, fun) {
